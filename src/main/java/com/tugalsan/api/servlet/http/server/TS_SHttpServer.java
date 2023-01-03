@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import javax.net.ssl.*;
 import com.sun.net.httpserver.*;
 import com.sun.net.httpserver.SimpleFileServer.*;
-import com.tugalsan.api.network.server.*;
+import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 
 public class TS_SHttpServer {
 
@@ -60,64 +60,67 @@ public class TS_SHttpServer {
 //        System.out.println("p12:" + p12);
 //        System.out.println("port:" + port);
 //    }
-    
-    public static void startHttpsServlet(String ip, int port, Path p12, String pass, TS_SHttpHandlerAbstract... handlers) {
-        try {
-            TS_NetworkSSLUtils.disableCertificateValidation();
-            var server = HttpsServer.create(new InetSocketAddress(ip, port), 2);
-            var sslContext = SSLContext.getInstance("TLS");
-            // The keystore is generated using the following three files:
-            //    - private_key.key
-            //    - site.crt
-            //    - site.ca-bundle
-            // ...and using the following set of commands (and password as "password"):
-            //    openssl pkcs12 -export -out keystore.pkcs12 -inkey private_key.key -certfile site.ca-bundle -in site.crt
-            //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
-
-            // initialise the keystore
-            var passwordCh = pass.toCharArray();
+    // The keystore is generated using the following three files:
+    //    - private_key.key
+    //    - site.crt
+    //    - site.ca-bundle
+    // ...and using the following set of commands (and password as "password"):
+    //    openssl pkcs12 -export -out keystore.pkcs12 -inkey private_key.key -certfile site.ca-bundle -in site.crt
+    //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
+    // initialise the keystore
+    private static SSLContext createSSLContext(Path p12, String pass) {
+        return TGS_UnSafe.compile(() -> {
+            //load keystore
             var ks = KeyStore.getInstance("PKCS12");
             try ( var fis = new FileInputStream(p12.toAbsolutePath().toString())) {
-                ks.load(fis, passwordCh);
+                ks.load(fis, pass.toCharArray());
             }
 
-            // setup the key manager factory
+            //convert keystore to key manager factories
             var kmf = KeyManagerFactory.getInstance("SunX509");
-            kmf.init(ks, passwordCh);
-
-            // setup the trust manager factory
+            kmf.init(ks, pass.toCharArray());
             var tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(ks);
 
-            // setup the HTTPS context and parameters
+            // create ssl Context
+            var sslContext = SSLContext.getInstance("TLS");
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            return sslContext;
+        }, e -> {
+            e.printStackTrace();
+            return null;
+        });
+    }
+
+    public static boolean startHttpsServlet(String ip, int port, Path p12, String pass, TS_SHttpHandlerAbstract... handlers) {
+        return TGS_UnSafe.compile(() -> {
+            var sslContext = createSSLContext(p12, pass); //create ssl server
+            if (sslContext == null) {
+                return false;
+            }
+            var server = HttpsServer.create(new InetSocketAddress(ip, port), 2);
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
-                    try {
-                        // initialise the SSL context
-                        var c = getSSLContext();
-                        var engine = c.createSSLEngine();
+                    TGS_UnSafe.execute(() -> {
+                        var newEngine = getSSLContext().createSSLEngine();
                         params.setNeedClientAuth(false);
-                        params.setCipherSuites(engine.getEnabledCipherSuites());
-                        params.setProtocols(engine.getEnabledProtocols());
-
-                        // Set the SSL parameters
-                        var sslParameters = c.getSupportedSSLParameters();
-                        params.setSSLParameters(sslParameters);
-
-                    } catch (Exception ex) {
+                        params.setCipherSuites(newEngine.getEnabledCipherSuites());
+                        params.setProtocols(newEngine.getEnabledProtocols());
+                        params.setSSLParameters(getSSLContext().getSupportedSSLParameters());
+                    }, e -> {
                         System.out.println("Failed to create HTTPS port");
-                        System.out.println(ex.getMessage());
-                    }
+                        System.out.println(e.getMessage());
+                    });
                 }
             });
-
             Arrays.stream(handlers).forEach(handler -> server.createContext(handler.slash_path, handler));
             server.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
             server.start();
-        } catch (Exception e) {
+            return true;
+        }, e -> {
             e.printStackTrace();
-        }
+            return false;
+        });
     }
 }

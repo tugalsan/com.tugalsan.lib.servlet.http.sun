@@ -13,6 +13,31 @@ import com.tugalsan.api.network.server.*;
 
 public class TS_SHttpServer {
 
+    @Deprecated //HTTP not safe
+    public static void startHttpFileServer(String ip, int port, Path root) {
+        try {
+            var server = SimpleFileServer.createFileServer(
+                    new InetSocketAddress(ip, port),
+                    root, OutputLevel.INFO
+            );
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Deprecated //HTTP not safe
+    public static void startHttpServlet(String ip, int port, TS_SHttpHandlerAbstract... handlers) {
+        try {
+            var server = HttpServer.create(new InetSocketAddress(ip, port), 2);
+            Arrays.stream(handlers).forEach(handler -> server.createContext(handler.slash_path, handler));
+            server.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
+            server.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     //cd C:\me\codes\com.tugalsan\res\com.tugalsan.res.file
     //java --enable-preview --add-modules jdk.incubator.concurrent -jar target/com.tugalsan.res.file-1.0-SNAPSHOT-jar-with-dependencies.jar
 //HOWTO
@@ -35,36 +60,7 @@ public class TS_SHttpServer {
 //        System.out.println("p12:" + p12);
 //        System.out.println("port:" + port);
 //    }
-    public static void startHttpFileServer(String ip, int port, Path root) {
-        try {
-            var server = SimpleFileServer.createFileServer(
-                    new InetSocketAddress(ip, port),
-                    root, OutputLevel.INFO
-            );
-            server.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void startHttpServlet(String ip, int port, TS_SHttpHandlerAbstract... handlers) {
-        try {
-            var server = HttpServer.create(new InetSocketAddress(ip, port), 2);
-            Arrays.stream(handlers).forEach(handler -> server.createContext(handler.slash_path, handler));
-            server.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
-            server.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /*
-        var ip = "127.0.0.1";
-        var root = Path.of("D:", "xampp_data", "DAT", "PUB", "RES");
-        var p12 = Path.of("D:", "xampp_data", "SSL", "tomcat.p12");
-        var pass = "MyPass";
-        var port = 8081;    
-     */
+    
     public static void startHttpsServlet(String ip, int port, Path p12, String pass, TS_SHttpHandlerAbstract... handlers) {
         try {
             TS_NetworkSSLUtils.disableCertificateValidation();

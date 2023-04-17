@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.tugalsan.api.executable</artifactId>
+            <artifactId>com.tugalsan.api.runnable</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

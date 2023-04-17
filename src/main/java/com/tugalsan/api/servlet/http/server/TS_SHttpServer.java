@@ -72,7 +72,7 @@ public class TS_SHttpServer {
     //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
     // initialise the keystore
     private static SSLContext createSSLContext(Path p12, String pass) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             //load keystore
             var ks = KeyStore.getInstance("PKCS12");
             try ( var fis = new FileInputStream(p12.toAbsolutePath().toString())) {
@@ -96,12 +96,12 @@ public class TS_SHttpServer {
     }
 
     private static HttpsServer createServer(String ip, int port, SSLContext sslContext) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             var server = HttpsServer.create(new InetSocketAddress(ip, port), 2);
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
-                    TGS_UnSafe.execute(() -> {
+                    TGS_UnSafe.run(() -> {
                         var newEngine = getSSLContext().createSSLEngine();
                         params.setNeedClientAuth(false);
                         params.setCipherSuites(newEngine.getEnabledCipherSuites());
@@ -130,7 +130,7 @@ public class TS_SHttpServer {
     }
 
     public static boolean startHttpsServlet(String ip, int port, Path p12, String pass, TS_SHttpHandlerAbstract... handlers) {
-        return TGS_UnSafe.compile(() -> {
+        return TGS_UnSafe.call(() -> {
             var sslContext = createSSLContext(p12, pass); //create ssl server
             if (sslContext == null) {
                 return false;

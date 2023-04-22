@@ -18,7 +18,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
     @Override
     public void handle(HttpExchange exchange) {
         TGS_UnSafe.run(() -> {
-            var payload = handle.compile(exchange);
+            var payload = handle.call(exchange);
             exchange.getResponseHeaders().set("Content-Type", "text/plain");
             exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             exchange.sendResponseHeaders(200, payload.length());

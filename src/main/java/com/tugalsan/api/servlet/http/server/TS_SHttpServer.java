@@ -42,7 +42,7 @@ public class TS_SHttpServer {
     }
 
     //cd C:\me\codes\com.tugalsan\res\com.tugalsan.res.file
-    //java --enable-preview --add-modules jdk.incubator.concurrent -jar target/com.tugalsan.res.file-1.0-SNAPSHOT-jar-with-dependencies.jar
+    //java --enable-preview --add-modules jdk.incubator.vector -jar target/com.tugalsan.res.file-1.0-SNAPSHOT-jar-with-dependencies.jar
 //HOWTO
 //    public static void main(String[] args) {
 //        var ip = "127.0.0.1";

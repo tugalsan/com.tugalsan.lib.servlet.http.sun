@@ -93,7 +93,7 @@ public class TS_SHttpServer {
         server.start();
     }
 
-    public static void sendError404(HttpExchange httpExchange) {
+    private static void sendError404(HttpExchange httpExchange) {
         TGS_UnSafe.run(() -> {
             try (httpExchange) {
                 httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());

@@ -10,12 +10,12 @@ import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 public abstract class TS_SHttpHandlerAbstract implements HttpHandler {
 
     final public String slash_path;
-    final protected TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> handle;
+    final protected TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange;
     final protected TGS_ValidatorType1<TGS_UrlParser> allow;
 
-    protected TS_SHttpHandlerAbstract(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> handle) {
+    protected TS_SHttpHandlerAbstract(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange) {
         this.slash_path = slash_path;
         this.allow = allow;
-        this.handle = handle;
+        this.httpExchange = httpExchange;
     }
 }

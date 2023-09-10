@@ -15,12 +15,12 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
 
     final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerText.class);
 
-    private TS_SHttpHandlerText(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> handle) {
-        super(slash_path, allow, handle);
+    private TS_SHttpHandlerText(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange) {
+        super(slash_path, allow, httpExchange);
     }
 
-    public static TS_SHttpHandlerText of(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> handle) {
-        return new TS_SHttpHandlerText(slash_path, allow, handle);
+    public static TS_SHttpHandlerText of(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange) {
+        return new TS_SHttpHandlerText(slash_path, allow, httpExchange);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
             }
             //GET PAYLOAD
             TGS_Tuple2<TGS_FileTypes, String> payload = allow.validate(parser)
-                    ? handle.call(httpExchange)
+                    ? this.httpExchange.call(httpExchange)
                     : TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED");
             {//SET HEADER
                 var headers = httpExchange.getResponseHeaders();

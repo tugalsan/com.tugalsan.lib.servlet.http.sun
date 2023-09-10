@@ -93,6 +93,15 @@ public class TS_SHttpServer {
         server.start();
     }
 
+    public static void sendError404(HttpExchange httpExchange) {
+        TGS_UnSafe.run(() -> {
+            try (httpExchange) {
+                httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());
+                httpExchange.sendResponseHeaders(404, 0);
+            }
+        }, e -> e.printStackTrace());
+    }
+
     private static void addHandlerFile(HttpServer server, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
         d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
@@ -100,10 +109,7 @@ public class TS_SHttpServer {
             var uri = httpExchange.getRequestURI();
             var requestPath = uri.getPath();
             if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
-                try (httpExchange) {
-                    httpExchange.setAttribute("request-path", "could not resolve request URI path");
-                    httpExchange.sendResponseHeaders(404, 0);
-                }
+                sendError404(httpExchange);
                 return;
             }
             var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));

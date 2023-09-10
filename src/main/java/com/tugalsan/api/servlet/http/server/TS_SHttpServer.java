@@ -12,6 +12,8 @@ import com.tugalsan.api.file.server.TS_DirectoryUtils;
 import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
+import com.tugalsan.api.url.client.TGS_Url;
+import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 
 public class TS_SHttpServer {
 
@@ -90,6 +92,28 @@ public class TS_SHttpServer {
         server.start();
     }
 
+    private static void addHandlerFile(HttpServer server, Path fileHandlerRoot) {
+        var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
+        d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
+        server.createContext("/file/", httpExchange -> {
+            var uri = httpExchange.getRequestURI();
+            var requestPath = uri.getPath();
+            if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
+                try (httpExchange) {
+                    httpExchange.setAttribute("request-path", "could not resolve request URI path");
+                    httpExchange.sendResponseHeaders(404, 0);
+                }
+                return;
+            }
+            var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+            parser.quary.params.forEach(param -> {
+                d.ci("startHttpsServlet.fileHandler", "param", param);
+            });
+            //TODO Allow Check
+            fileHandler.handle(httpExchange);
+        });
+    }
+
     public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
             if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
@@ -107,22 +131,7 @@ public class TS_SHttpServer {
                 return false;
             }
             if (fileHandlerRoot != null) {
-                var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
-                d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
-                server.createContext("/file/", httpHandler -> {
-                    var requestPath = httpHandler.getRequestURI().getPath();
-                    if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
-                        try (httpHandler) {
-                            httpHandler.setAttribute("request-path", "could not resolve request URI path");
-                            httpHandler.sendResponseHeaders(404, 0);
-                        }
-                        return;
-                    }
-                    var query = httpHandler.getRequestURI().getQuery();
-                    d.ci("startHttpsServlet.fileHandler", "query", query);
-                    //TODO Allow Check
-                    fileHandler.handle(httpHandler);
-                });
+                addHandlerFile(server, fileHandlerRoot);
             }
             addHanders(server, customHandlers);
             start(server);

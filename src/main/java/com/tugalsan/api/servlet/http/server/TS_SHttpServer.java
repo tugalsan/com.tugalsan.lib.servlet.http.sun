@@ -50,8 +50,8 @@ public class TS_SHttpServer {
     private static HttpsServer createServer(String ip, int port, SSLContext sslContext) {
         return TGS_UnSafe.call(() -> {
             var server = ip == null
-                    ? HttpsServer.create(new InetSocketAddress(port), 2)//InetAddress.getLoopbackAddress()
-                    : HttpsServer.create(new InetSocketAddress(ip, port), 2);
+                    ? HttpsServer.create(new InetSocketAddress(port), 0)//InetAddress.getLoopbackAddress() , 2
+                    : HttpsServer.create(new InetSocketAddress(ip, port), 0);//, 2
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {

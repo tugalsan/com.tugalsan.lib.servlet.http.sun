@@ -14,6 +14,7 @@ import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
+import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 
 public class TS_SHttpServer {
 
@@ -92,7 +93,7 @@ public class TS_SHttpServer {
         server.start();
     }
 
-    private static void addHandlerFile(HttpServer server, Path fileHandlerRoot) {
+    private static void addHandlerFile(HttpServer server, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
         d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
         server.createContext("/file/", httpExchange -> {
@@ -106,15 +107,20 @@ public class TS_SHttpServer {
                 return;
             }
             var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
-            parser.quary.params.forEach(param -> {
-                d.ci("startHttpsServlet.fileHandler", "param", param);
-            });
-            //TODO Allow Check
+            if (d.infoEnable) {
+                d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);
+                parser.quary.params.forEach(param -> {
+                    d.ci("startHttpsServlet.fileHandler", "--param", param);
+                });
+            }
+            if (!url.validate(parser)) {
+                return;
+            }
             fileHandler.handle(httpExchange);
         });
     }
 
-    public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TGS_UrlParser> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
             if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: fileHandlerRoot not exists", fileHandlerRoot);
@@ -131,7 +137,7 @@ public class TS_SHttpServer {
                 return false;
             }
             if (fileHandlerRoot != null) {
-                addHandlerFile(server, fileHandlerRoot);
+                addHandlerFile(server, fileHandlerRoot, allow);
             }
             addHanders(server, customHandlers);
             start(server);

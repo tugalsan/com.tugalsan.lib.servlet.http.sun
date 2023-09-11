@@ -13,8 +13,8 @@ public class TS_SHttpConfigSSL {
     public String pass;
     public boolean redirectToSSL;
 
-    public static TS_SHttpConfigSSL of(Path p12, String pass, boolean redirect) {
-        return new TS_SHttpConfigSSL(p12, pass, redirect);
+    public static TS_SHttpConfigSSL of(Path p12, String pass, boolean redirectToSSL) {
+        return new TS_SHttpConfigSSL(p12, pass, redirectToSSL);
     }
 
     @Override

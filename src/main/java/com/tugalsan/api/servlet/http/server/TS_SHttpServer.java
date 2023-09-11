@@ -150,7 +150,7 @@ public class TS_SHttpServer {
             addHanders(serverHttps, customHandlers);
             start(serverHttps);
             d.ci("startHttpsServlet.fileHandler", "server started", network);
-            if (!ssl.redirect) {
+            if (!ssl.redirectToSSL) {
                 return true;
             }
             var serverHttp = createServer(network.cloneIt().setPort(80), null);

@@ -4,14 +4,14 @@ import java.nio.file.Path;
 
 public class TS_SHttpConfigSSL {
 
-    private TS_SHttpConfigSSL(Path p12, String pass, boolean redirect) {
+    private TS_SHttpConfigSSL(Path p12, String pass, boolean redirectToSSL) {
         this.p12 = p12;
         this.pass = pass;
-        this.redirect = redirect;
+        this.redirectToSSL = redirectToSSL;
     }
     public Path p12;
     public String pass;
-    public boolean redirect;
+    public boolean redirectToSSL;
 
     public static TS_SHttpConfigSSL of(Path p12, String pass, boolean redirect) {
         return new TS_SHttpConfigSSL(p12, pass, redirect);
@@ -19,7 +19,7 @@ public class TS_SHttpConfigSSL {
 
     @Override
     public String toString() {
-        return TS_SHttpConfigSSL.class.getSimpleName() + "{" + "p12=" + p12 + ", pass=" + pass + ", redirect=" + redirect + '}';
+        return TS_SHttpConfigSSL.class.getSimpleName() + "{" + "p12=" + p12 + ", pass=" + pass + ", redirect=" + redirectToSSL + '}';
     }
 
 }

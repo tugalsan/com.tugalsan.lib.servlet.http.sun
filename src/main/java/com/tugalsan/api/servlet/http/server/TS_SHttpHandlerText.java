@@ -28,7 +28,7 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
         TGS_UnSafe.run(() -> {
             try (httpExchange) {
                 //PARSER
-                var uri = TS_SHttpUtils.getURI(httpExchange);
+                var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
                     d.ce("handle", "ERROR url base null");
                     TS_SHttpUtils.sendError404(httpExchange);

@@ -45,7 +45,7 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 TGS_Tuple2<TGS_FileTypes, String> payload = allow.validate(parser)
                         ? this.httpExchange.call(httpExchange)
                         : TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED");
-                if (payload.value0 == null) {
+                if (payload == null || payload.value0 == null|| payload.value1 == null) {
                     return;
                 }
                 {//SET HEADER

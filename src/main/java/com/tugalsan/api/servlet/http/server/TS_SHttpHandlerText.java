@@ -30,7 +30,7 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 //PARSER
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle", "ERROR url base null");
+                    d.ce("handle.text", "ERROR sniff url from httpExchange is null");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }

@@ -100,7 +100,7 @@ public class TS_SHttpServer {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle", "ERROR url base null");
+                    d.ce("handle.file", "ERROR sniff url from httpExchange is null");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
@@ -129,7 +129,7 @@ public class TS_SHttpServer {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle", "ERROR url base null");
+                    d.ce("handle.redirect", "ERROR sniff url from httpExchange is null");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }

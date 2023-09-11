@@ -22,4 +22,13 @@ public class TS_SHttpUtils {
         var requestedUri = ex.getRequestURI();
         return Optional.of(base.resolve(requestedUri));
     }
+
+    public static void sendError404(HttpExchange httpExchange) {
+        TGS_UnSafe.run(() -> {
+            try (httpExchange) {
+                httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());
+                httpExchange.sendResponseHeaders(404, 0);
+            }
+        }, e -> e.printStackTrace());
+    }
 }

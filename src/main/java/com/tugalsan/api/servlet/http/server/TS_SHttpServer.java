@@ -93,24 +93,22 @@ public class TS_SHttpServer {
         server.start();
     }
 
-    private static void sendError404(HttpExchange httpExchange) {
-        TGS_UnSafe.run(() -> {
-            try (httpExchange) {
-                httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());
-                httpExchange.sendResponseHeaders(404, 0);
-            }
-        }, e -> e.printStackTrace());
-    }
+    
 
     private static void addHandlerFile(HttpServer server, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
         d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
         server.createContext("/file/", httpExchange -> {
-            try (var a = httpExchange) {
-                var uri = httpExchange.getRequestURI();
+            try (httpExchange) {
+                var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
+                if (uri == null) {
+                    d.ce("handle", "ERROR url base null");
+                    TS_SHttpUtils.sendError404(httpExchange);
+                    return;
+                }
                 var requestPath = uri.getPath();
                 if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
-                    sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
@@ -155,7 +153,7 @@ public class TS_SHttpServer {
             }
             var serverHttp = createServer(network.cloneIt().setPort(80), null);
             serverHttp.createContext("/", httpExchange -> {
-                try (var a = httpExchange) {
+                try (httpExchange) {
                     var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                     if (uri == null) {
                         d.ce("handle", "ERROR url base null");

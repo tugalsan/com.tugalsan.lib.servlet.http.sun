@@ -25,17 +25,15 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
 
     @Override
     public void handle(HttpExchange httpExchange) {
-        /*
-        Noted should be that the response.length() part in their example is bad, 
-        it should have been response.getBytes().length. 
-        Even then, the getBytes() method must explicitly 
-        specify the charset which you then specify in the response header. 
-        Alas, albeit misguiding to starters, it's after all just a basic kickoff example.
-         */
         TGS_UnSafe.run(() -> {
-            try (var a = httpExchange) {
+            try (httpExchange) {
                 //PARSER
-                var uri = httpExchange.getRequestURI();
+                var uri = TS_SHttpUtils.getURI(httpExchange);
+                if (uri == null) {
+                    d.ce("handle", "ERROR url base null");
+                    TS_SHttpUtils.sendError404(httpExchange);
+                    return;
+                }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 if (d.infoEnable) {
                     d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);

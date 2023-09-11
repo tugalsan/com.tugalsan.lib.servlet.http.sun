@@ -84,21 +84,19 @@ public class TS_SHttpServer {
         });
     }
 
-    private static void addHanders(HttpServer server, TS_SHttpHandlerAbstract... handlers) {
-        Arrays.stream(handlers).forEach(handler -> server.createContext(handler.slash_path, handler));
+    private static void addHanders(HttpServer httpServer, TS_SHttpHandlerAbstract... handlers) {
+        Arrays.stream(handlers).forEach(handler -> httpServer.createContext(handler.slash_path, handler));
     }
 
-    private static void start(HttpServer server) {
-        server.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
-        server.start();
+    private static void start(HttpServer httpServer) {
+        httpServer.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
+        httpServer.start();
     }
 
-    
-
-    private static void addHandlerFile(HttpServer server, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
+    private static void addHandlerFile(HttpServer httpServer, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
         d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
-        server.createContext("/file/", httpExchange -> {
+        httpServer.createContext("/file/", httpExchange -> {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
@@ -126,6 +124,28 @@ public class TS_SHttpServer {
         });
     }
 
+    private static void addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork network) {
+        httpServer.createContext("/", httpExchange -> {
+            try (httpExchange) {
+                var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
+                if (uri == null) {
+                    d.ce("handle", "ERROR url base null");
+                    TS_SHttpUtils.sendError404(httpExchange);
+                    return;
+                }
+                var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                parser.protocol.value = "https://";
+                parser.host.port = network.port;
+                var redirectUrl = parser.toString();
+                d.ci("handle", "redirectUrl", redirectUrl);
+                httpExchange.getResponseHeaders().set("Location", redirectUrl);
+                TGS_UnSafe.run(() -> {
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
+                }, e -> d.ct("handle", e));
+            }
+        });
+    }
+
     public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TGS_UrlParser> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
             if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
@@ -137,40 +157,23 @@ public class TS_SHttpServer {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: createSSLContext returned null");
                 return false;
             }
-            var serverHttps = createServer(network, sslContext);
-            if (serverHttps == null) {
+            var httpsServer = createServer(network, sslContext);
+            if (httpsServer == null) {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: createServer returned null");
                 return false;
             }
             if (fileHandlerRoot != null) {
-                addHandlerFile(serverHttps, fileHandlerRoot, allow);
+                addHandlerFile(httpsServer, fileHandlerRoot, allow);
             }
-            addHanders(serverHttps, customHandlers);
-            start(serverHttps);
+            addHanders(httpsServer, customHandlers);
+            start(httpsServer);
             d.ci("startHttpsServlet.fileHandler", "server started", network);
             if (!ssl.redirectToSSL) {
                 return true;
             }
-            var serverHttp = createServer(network.cloneIt().setPort(80), null);
-            serverHttp.createContext("/", httpExchange -> {
-                try (httpExchange) {
-                    var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
-                    if (uri == null) {
-                        d.ce("handle", "ERROR url base null");
-                        return;
-                    }
-                    var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
-                    parser.protocol.value = "https://";
-                    parser.host.port = network.port;
-                    var redirectUrl = parser.toString();
-                    d.ci("handle", "redirectUrl", redirectUrl);
-                    httpExchange.getResponseHeaders().set("Location", redirectUrl);
-                    TGS_UnSafe.run(() -> {
-                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
-                    }, e -> d.ct("handle", e));
-                }
-            });
-            start(serverHttp);
+            var httpServer = createServer(network.cloneIt().setPort(80), null);
+            addHandlerRedirect(httpServer, network);
+            start(httpServer);
             return true;
         }, e -> {
             d.ce("startHttpsServlet", e);

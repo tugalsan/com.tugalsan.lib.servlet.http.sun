@@ -106,23 +106,25 @@ public class TS_SHttpServer {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
         d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
         server.createContext("/file/", httpExchange -> {
-            var uri = httpExchange.getRequestURI();
-            var requestPath = uri.getPath();
-            if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
-                sendError404(httpExchange);
-                return;
+            try (var a = httpExchange) {
+                var uri = httpExchange.getRequestURI();
+                var requestPath = uri.getPath();
+                if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
+                    sendError404(httpExchange);
+                    return;
+                }
+                var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                if (d.infoEnable) {
+                    d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);
+                    parser.quary.params.forEach(param -> {
+                        d.ci("startHttpsServlet.fileHandler", "--param", param);
+                    });
+                }
+                if (!url.validate(parser)) {
+                    return;
+                }
+                fileHandler.handle(httpExchange);
             }
-            var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
-            if (d.infoEnable) {
-                d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);
-                parser.quary.params.forEach(param -> {
-                    d.ci("startHttpsServlet.fileHandler", "--param", param);
-                });
-            }
-            if (!url.validate(parser)) {
-                return;
-            }
-            fileHandler.handle(httpExchange);
         });
     }
 
@@ -137,17 +139,40 @@ public class TS_SHttpServer {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: createSSLContext returned null");
                 return false;
             }
-            var server = createServer(network, sslContext);
-            if (server == null) {
+            var serverHttps = createServer(network, sslContext);
+            if (serverHttps == null) {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: createServer returned null");
                 return false;
             }
             if (fileHandlerRoot != null) {
-                addHandlerFile(server, fileHandlerRoot, allow);
+                addHandlerFile(serverHttps, fileHandlerRoot, allow);
             }
-            addHanders(server, customHandlers);
-            start(server);
+            addHanders(serverHttps, customHandlers);
+            start(serverHttps);
             d.ci("startHttpsServlet.fileHandler", "server started", network);
+            if (!ssl.redirect) {
+                return true;
+            }
+            var serverHttp = createServer(network.cloneIt().setPort(80), null);
+            serverHttp.createContext("/", httpExchange -> {
+                try (var a = httpExchange) {
+                    var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
+                    if (uri == null) {
+                        d.ce("handle", "ERROR url base null");
+                        return;
+                    }
+                    var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                    parser.protocol.value = "https://";
+                    parser.host.port = network.port;
+                    var redirectUrl = parser.toString();
+                    d.ci("handle", "redirectUrl", redirectUrl);
+                    httpExchange.getResponseHeaders().set("Location", redirectUrl);
+                    TGS_UnSafe.run(() -> {
+                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
+                    }, e -> d.ct("handle", e));
+                }
+            });
+            start(serverHttp);
             return true;
         }, e -> {
             d.ce("startHttpsServlet", e);

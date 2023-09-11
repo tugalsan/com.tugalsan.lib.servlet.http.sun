@@ -17,4 +17,13 @@ public class TS_SHttpConfigNetwork {
     public String toString() {
         return TS_SHttpConfigNetwork.class.getSimpleName() + "{" + "ip=" + ip + ", port=" + port + '}';
     }
+
+    public TS_SHttpConfigNetwork cloneIt() {
+        return new TS_SHttpConfigNetwork(ip, port);
+    }
+
+    public TS_SHttpConfigNetwork setPort(int port) {
+        this.port = port;
+        return this;
+    }
 }

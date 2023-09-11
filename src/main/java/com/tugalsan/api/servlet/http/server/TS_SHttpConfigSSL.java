@@ -19,7 +19,7 @@ public class TS_SHttpConfigSSL {
 
     @Override
     public String toString() {
-        return TS_SHttpConfigSSL.class.getSimpleName() + "{" + "p12=" + p12 + ", pass=" + pass + ", redirect=" + redirectToSSL + '}';
+        return TS_SHttpConfigSSL.class.getSimpleName() + "{" + "p12=" + p12 + ", pass=" + pass + ", reredirectToSSLdirect=" + redirectToSSL + '}';
     }
 
 }

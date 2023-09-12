@@ -9,6 +9,10 @@ public class TS_SHttpConfigNetwork {
     public String ip;
     public int port;
 
+    public static TS_SHttpConfigNetwork ofHTTP() {
+        return new TS_SHttpConfigNetwork("localhost", 80);
+    }
+
     public static TS_SHttpConfigNetwork of(String ip, int port) {
         return new TS_SHttpConfigNetwork(ip, port);
     }

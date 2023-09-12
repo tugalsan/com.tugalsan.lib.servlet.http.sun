@@ -15,12 +15,12 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
 
     final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerText.class);
 
-    private TS_SHttpHandlerText(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange) {
-        super(slash_path, allow, httpExchange);
+    private TS_SHttpHandlerText(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
+        super(slash_path, allow, request);
     }
 
-    public static TS_SHttpHandlerText of(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, HttpExchange> httpExchange) {
-        return new TS_SHttpHandlerText(slash_path, allow, httpExchange);
+    public static TS_SHttpHandlerText of(String slash_path, TGS_ValidatorType1<TGS_UrlParser> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
+        return new TS_SHttpHandlerText(slash_path, allow, request);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 //PARSER
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle.text", "ERROR sniff url from httpExchange is null");
+                    d.ce("handle.text", "ERROR sniff url from httpExchange is null ⚠");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
@@ -43,9 +43,9 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 }
                 //GET PAYLOAD
                 TGS_Tuple2<TGS_FileTypes, String> payload = allow.validate(parser)
-                        ? this.httpExchange.call(httpExchange)
-                        : TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED");
-                if (payload == null || payload.value0 == null|| payload.value1 == null) {
+                        ? this.request.call(TS_SHttpHandlerRequest.of(httpExchange, parser))
+                        : TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");
+                if (payload == null || payload.value0 == null || payload.value1 == null) {
                     return;
                 }
                 {//SET HEADER

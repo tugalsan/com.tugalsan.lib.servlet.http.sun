@@ -9,17 +9,21 @@ import java.util.Optional;
 
 public class TS_SHttpUtils {
 
-    public static Optional<URI> getURI(HttpExchange ex) {
+    public static boolean isLocal(HttpExchange httpExchange) {
+        return httpExchange.getLocalAddress().equals(httpExchange.getRemoteAddress());
+    }
+
+    public static Optional<URI> getURI(HttpExchange httpExchange) {
         var host = TGS_Coronator.ofStr()
-                .anoint(val -> ex.getRequestHeaders().getFirst("Host"))
-                .anointIf(val -> val == null, val -> "localhost:" + ex.getHttpContext().getServer().getAddress().getPort())
+                .anoint(val -> httpExchange.getRequestHeaders().getFirst("Host"))
+                .anointIf(val -> val == null, val -> "localhost:" + httpExchange.getHttpContext().getServer().getAddress().getPort())
                 .coronate();
-        var protocol = (ex.getHttpContext().getServer() instanceof HttpsServer) ? "https" : "http";
+        var protocol = (httpExchange.getHttpContext().getServer() instanceof HttpsServer) ? "https" : "http";
         var base = TGS_UnSafe.call(() -> new URI(protocol, host, "/", null, null), e -> null);
         if (base == null) {
             return Optional.empty();
         }
-        var requestedUri = ex.getRequestURI();
+        var requestedUri = httpExchange.getRequestURI();
         return Optional.of(base.resolve(requestedUri));
     }
 

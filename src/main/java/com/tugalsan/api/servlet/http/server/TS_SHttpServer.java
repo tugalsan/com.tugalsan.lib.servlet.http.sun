@@ -118,7 +118,6 @@ public class TS_SHttpServer {
                 }
                 var request = TS_SHttpHandlerRequest.of(httpExchange, parser);
                 if (!allow.validate(request)) {
-                    d.ci("addHandlerFile", "ERROR: i am grumpy, and will work only localhost 😠");
                     return;
                 }
                 fileHandler.handle(httpExchange);

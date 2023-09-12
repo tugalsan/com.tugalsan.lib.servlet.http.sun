@@ -11,16 +11,16 @@ import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.charset.*;
 
-public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
+public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerText.class);
+    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerString.class);
 
-    private TS_SHttpHandlerText(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
+    private TS_SHttpHandlerString(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
         super(slash_path, allow, request);
     }
 
-    public static TS_SHttpHandlerText of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
-        return new TS_SHttpHandlerText(slash_path, allow, request);
+    public static TS_SHttpHandlerString of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
+        return new TS_SHttpHandlerString(slash_path, allow, request);
     }
 
     @Override

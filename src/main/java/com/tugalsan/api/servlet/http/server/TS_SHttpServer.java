@@ -14,7 +14,6 @@ import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
-import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 
 public class TS_SHttpServer {
 
@@ -93,10 +92,10 @@ public class TS_SHttpServer {
         httpServer.start();
     }
 
-    private static void addHandlerFile(HttpServer httpServer, Path fileHandlerRoot, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow) {
-        var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
-        d.ci("addHandlerFile", "fileHandlerRoot", fileHandlerRoot);
-        httpServer.createContext("/file/", httpExchange -> {
+    private static void addHandlerFile(HttpServer httpServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
+        var fileHandler = SimpleFileServer.createFileHandler(fileHandlerConfig.root);
+        d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
+        httpServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
@@ -113,11 +112,11 @@ public class TS_SHttpServer {
                 if (d.infoEnable) {
                     d.ci("addHandlerFile", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
-                        d.ci("addHandlerFile", "--param", param);
+                        d.ci("addHandlerFile", "param", param);
                     });
                 }
                 var request = TS_SHttpHandlerRequest.of(httpExchange, parser);
-                if (!allow.validate(request)) {
+                if (!fileHandlerConfig.allow.validate(request)) {
                     return;
                 }
                 fileHandler.handle(httpExchange);
@@ -147,28 +146,28 @@ public class TS_SHttpServer {
         });
     }
 
-    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandler, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
-            if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
-                d.ce("startHttpsServlet.fileHandler", "ERROR: fileHandlerRoot not exists", fileHandlerRoot);
+            if (fileHandler.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandler.root)) {
+                d.ce("of", "ERROR: fileHandler.root not exists", fileHandler.root);
                 return false;
             }
             var sslContext = createSSLContext(ssl); //create ssl server
             if (sslContext == null) {
-                d.ce("startHttpsServlet.fileHandler", "ERROR: createSSLContext returned null");
+                d.ce("of", "ERROR: createSSLContext returned null");
                 return false;
             }
             var httpsServer = createServer(network, sslContext);
             if (httpsServer == null) {
-                d.ce("startHttpsServlet.fileHandler", "ERROR: createServer returned null");
+                d.ce("of", "ERROR: createServer returned null");
                 return false;
             }
-            if (fileHandlerRoot != null) {
-                addHandlerFile(httpsServer, fileHandlerRoot, allow);
+            if (fileHandler.root != null) {
+                addHandlerFile(httpsServer, fileHandler);
             }
             addHanders(httpsServer, customHandlers);
             start(httpsServer);
-            d.ci("startHttpsServlet.fileHandler", "server started", network);
+            d.ci("of", "server started", network);
             if (!ssl.redirectToSSL) {
                 return true;
             }

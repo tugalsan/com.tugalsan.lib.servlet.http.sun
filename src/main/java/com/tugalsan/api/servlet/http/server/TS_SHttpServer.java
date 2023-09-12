@@ -147,7 +147,7 @@ public class TS_SHttpServer {
         });
     }
 
-    public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
             if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: fileHandlerRoot not exists", fileHandlerRoot);

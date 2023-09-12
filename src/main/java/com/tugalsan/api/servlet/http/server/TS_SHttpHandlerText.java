@@ -36,9 +36,9 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 if (d.infoEnable) {
-                    d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);
+                    d.ci("handle.text", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
-                        d.ci("startHttpsServlet.fileHandler", "--param", param);
+                        d.ci("handle.text", "--param", param);
                     });
                 }
                 //GET PAYLOAD

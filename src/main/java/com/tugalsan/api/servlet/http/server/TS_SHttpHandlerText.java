@@ -30,15 +30,15 @@ public class TS_SHttpHandlerText extends TS_SHttpHandlerAbstract {
                 //PARSER
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle.text", "ERROR sniff url from httpExchange is null ⚠");
+                    d.ce("handle", "ERROR sniff url from httpExchange is null ⚠");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 if (d.infoEnable) {
-                    d.ci("handle.text", "parser.toString", parser);
+                    d.ci("handle", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
-                        d.ci("handle.text", "--param", param);
+                        d.ci("handle", "param", param);
                     });
                 }
                 //GET PAYLOAD

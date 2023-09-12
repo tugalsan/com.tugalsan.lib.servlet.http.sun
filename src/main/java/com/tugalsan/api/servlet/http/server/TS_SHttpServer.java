@@ -93,14 +93,14 @@ public class TS_SHttpServer {
         httpServer.start();
     }
 
-    private static void addHandlerFile(HttpServer httpServer, Path fileHandlerRoot, TGS_ValidatorType1<TGS_UrlParser> url) {
+    private static void addHandlerFile(HttpServer httpServer, Path fileHandlerRoot, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerRoot);
-        d.ci("startHttpsServlet.fileHandler", "fileHandlerRoot", fileHandlerRoot);
+        d.ci("addHandlerFile", "fileHandlerRoot", fileHandlerRoot);
         httpServer.createContext("/file/", httpExchange -> {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle.file", "ERROR sniff url from httpExchange is null");
+                    d.ce("addHandlerFile", "ERROR sniff url from httpExchange is null");
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
@@ -111,12 +111,14 @@ public class TS_SHttpServer {
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 if (d.infoEnable) {
-                    d.ci("startHttpsServlet.fileHandler", "parser.toString", parser);
+                    d.ci("addHandlerFile", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
-                        d.ci("startHttpsServlet.fileHandler", "--param", param);
+                        d.ci("addHandlerFile", "--param", param);
                     });
                 }
-                if (!url.validate(parser)) {
+                var request = TS_SHttpHandlerRequest.of(httpExchange, parser);
+                if (!allow.validate(request)) {
+                    d.ci("addHandlerFile", "ERROR: i am grumpy, and will work only localhost 😠");
                     return;
                 }
                 fileHandler.handle(httpExchange);
@@ -146,7 +148,7 @@ public class TS_SHttpServer {
         });
     }
 
-    public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TGS_UrlParser> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean startHttpsServlet(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path fileHandlerRoot, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
             if (fileHandlerRoot != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerRoot)) {
                 d.ce("startHttpsServlet.fileHandler", "ERROR: fileHandlerRoot not exists", fileHandlerRoot);

@@ -1,6 +1,5 @@
 package com.tugalsan.api.servlet.http.server;
 
-import com.tugalsan.api.servlet.http.server.TS_SHttpHandlerRequest;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.file.Path;
 

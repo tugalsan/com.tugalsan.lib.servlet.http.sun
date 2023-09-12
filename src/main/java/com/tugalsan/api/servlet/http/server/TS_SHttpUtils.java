@@ -5,12 +5,16 @@ import com.sun.net.httpserver.HttpsServer;
 import com.tugalsan.api.coronator.client.TGS_Coronator;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 
 public class TS_SHttpUtils {
 
     public static boolean isLocal(HttpExchange httpExchange) {
-        return httpExchange.getLocalAddress().equals(httpExchange.getRemoteAddress());
+        return Objects.equals(
+                httpExchange.getLocalAddress().getHostName(),
+                httpExchange.getRemoteAddress().getHostName()
+        );
     }
 
     public static Optional<URI> getURI(HttpExchange httpExchange) {

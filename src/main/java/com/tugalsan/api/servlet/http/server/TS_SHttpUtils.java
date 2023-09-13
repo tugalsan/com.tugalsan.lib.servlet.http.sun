@@ -3,12 +3,15 @@ package com.tugalsan.api.servlet.http.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;
 import com.tugalsan.api.coronator.client.TGS_Coronator;
+import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
 public class TS_SHttpUtils {
+
+    final private static TS_Log d = TS_Log.of(true, TS_SHttpUtils.class);
 
     public static boolean isLocal(HttpExchange httpExchange) {
         return Objects.equals(
@@ -31,9 +34,10 @@ public class TS_SHttpUtils {
         return Optional.of(base.resolve(requestedUri));
     }
 
-    public static void sendError404(HttpExchange httpExchange) {
+    public static void sendError404(HttpExchange httpExchange, CharSequence funcName, CharSequence consoleErrorMessage) {
         TGS_UnSafe.run(() -> {
             try (httpExchange) {
+                d.ce("sendError404", funcName, consoleErrorMessage);
                 httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());
                 httpExchange.sendResponseHeaders(404, 0);
             }

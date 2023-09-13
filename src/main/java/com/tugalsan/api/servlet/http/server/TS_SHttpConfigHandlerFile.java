@@ -1,11 +1,14 @@
 package com.tugalsan.api.servlet.http.server;
 
 import com.tugalsan.api.coronator.client.TGS_Coronator;
+import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.string.client.TGS_StringUtils;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.file.Path;
 
 public class TS_SHttpConfigHandlerFile {
+
+    final private static TS_Log d = TS_Log.of(true, TS_SHttpConfigHandlerFile.class);
 
     public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root) {
         this.slash_path_slash = TGS_Coronator.ofStr()
@@ -14,6 +17,7 @@ public class TS_SHttpConfigHandlerFile {
                 .anointIf(val -> val.indexOf(0) != '/', val -> "/" + val)
                 .anointIf(val -> val.indexOf(val.length() - 1) != '/', val -> val + "/")
                 .coronate();
+        d.ci("constructor", "slash_path_slash", slash_path_slash);
         this.allow = allow;
         this.root = root;
     }

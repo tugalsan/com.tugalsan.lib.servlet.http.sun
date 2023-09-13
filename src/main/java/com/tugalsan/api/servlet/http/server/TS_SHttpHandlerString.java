@@ -34,7 +34,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
                     d.ce("handle", "ERROR sniff url from httpExchange is null ⚠");
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(TS_CharSetUtils.makePrintable(uri.toString())));
@@ -45,8 +45,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                     });
                 }
                 if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
-                    d.ce("handle", "ERROR: hack detected ⚠", parser.path.toString_url());
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR: hack detected ⚠ " + parser.path.toString_url());
                     return;
                 }
                 //GET PAYLOAD

@@ -101,19 +101,17 @@ public class TS_SHttpServer {
                 d.ci("addHandlerFile", "hello");
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("addHandlerFile", "ERROR sniff url from httpExchange is null");
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "ERROR sniff url from httpExchange is null");
                     return;
                 }
                 var requestPath = uri.getPath();
                 if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "FileNotExists" + requestPath);
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
-                    d.ce("addHandlerFile", "ERROR: hack detected ⚠", parser.path.toString_url());
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "isHackedUrl? " + parser.path.toString_url());
                     return;
                 }
                 if (d.infoEnable) {
@@ -136,8 +134,7 @@ public class TS_SHttpServer {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
-                    d.ce("handle.redirect", "ERROR sniff url from httpExchange is null");
-                    TS_SHttpUtils.sendError404(httpExchange);
+                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerRedirect", "ERROR sniff url from httpExchange is null");
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));

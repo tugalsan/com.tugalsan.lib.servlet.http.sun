@@ -23,8 +23,7 @@ public class TS_SHttpHandlerRequest {
         return TS_SHttpUtils.isLocal(httpExchange);
     }
 
-    final public void sendError404(Object... consoleErrorMessage) {
-        d.ce("sendError404", consoleErrorMessage);
-        TS_SHttpUtils.sendError404(httpExchange);
+    final public void sendError404(CharSequence funcName, CharSequence consoleErrorMessage) {
+        TS_SHttpUtils.sendError404(httpExchange, funcName, consoleErrorMessage);
     }
 }

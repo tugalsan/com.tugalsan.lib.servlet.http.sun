@@ -183,9 +183,9 @@ public class TS_SHttpServer {
                 return true;
             }
             var redirectNetwork = network.cloneIt().setPort(80);
-            var httpServer = createHttpServer(network.cloneIt().setPort(80));
-            addHandlerRedirect(httpServer, network);
-            start(httpServer);
+            var redirectServer = createHttpServer(network.cloneIt().setPort(80));
+            addHandlerRedirect(redirectServer, network);
+            start(redirectServer);
             d.ci("of", "redirect server started", redirectNetwork);
             return true;
         }, e -> {

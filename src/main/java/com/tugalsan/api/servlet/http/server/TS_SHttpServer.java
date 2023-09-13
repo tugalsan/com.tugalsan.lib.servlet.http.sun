@@ -13,6 +13,7 @@ import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import com.tugalsan.api.url.client.TGS_Url;
+import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 
 public class TS_SHttpServer {
@@ -109,6 +110,11 @@ public class TS_SHttpServer {
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
+                    d.ce("addHandlerFile", "ERROR: hack detected ⚠", parser.path.toString_url());
+                    TS_SHttpUtils.sendError404(httpExchange);
+                    return;
+                }
                 if (d.infoEnable) {
                     d.ci("addHandlerFile", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {

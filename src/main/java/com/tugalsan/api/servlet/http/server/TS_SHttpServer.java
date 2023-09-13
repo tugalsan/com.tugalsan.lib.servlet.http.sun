@@ -90,8 +90,11 @@ public class TS_SHttpServer {
         });
     }
 
-    private static void addHanders(HttpsServer httpServer, TS_SHttpHandlerAbstract... handlers) {
-        Arrays.stream(handlers).forEach(handler -> httpServer.createContext(handler.slash_path, handler));
+    private static void addCustomHanders(HttpsServer httpServer, TS_SHttpHandlerAbstract... handlers) {
+        Arrays.stream(handlers).forEach(handler -> {
+            d.ce("addCustomHanders", handler.slash_path, handler.getClass().getSimpleName());
+            httpServer.createContext(handler.slash_path, handler);
+        });
     }
 
     private static void start(HttpServer httpServer) {
@@ -176,7 +179,7 @@ public class TS_SHttpServer {
             if (fileHandlerConfig.root != null) {
                 addHandlerFile(httpsServer, fileHandlerConfig);
             }
-            addHanders(httpsServer, customHandlers);
+            addCustomHanders(httpsServer, customHandlers);
             start(httpsServer);
             d.ci("of", network, "httpsServer started");
             if (!ssl.redirectToSSL) {

@@ -20,8 +20,14 @@ public abstract class TS_SHttpHandlerAbstract implements HttpHandler {
     protected TS_SHttpHandlerAbstract(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
         this.slash_path = TGS_Coronator.ofStr()
                 .anoint(val -> slash_path)
-                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> "/")
-                .anointIf(val -> val.indexOf(0) != '/', val -> "/" + val)
+                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
+                    d.ci("constructor", "TGS_StringUtils::isNullOrEmpty", "set as '/'");
+                    return "/";
+                })
+                .anointIf(val -> val.charAt(0) != '/', val -> {
+                    d.ci("constructor", "val.charAt(0) != '/'", "add '/' to the left");
+                    return "/" + val;
+                })
                 .coronate();
         d.ci("constructor", "slash_path", slash_path);
         this.allow = allow;

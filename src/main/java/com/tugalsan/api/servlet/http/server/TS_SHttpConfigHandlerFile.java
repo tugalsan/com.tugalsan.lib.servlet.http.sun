@@ -13,9 +13,18 @@ public class TS_SHttpConfigHandlerFile {
     public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root) {
         this.slash_path_slash = TGS_Coronator.ofStr()
                 .anoint(val -> slash_path_slash)
-                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> "/")
-                .anointIf(val -> val.indexOf(0) != '/', val -> "/" + val)
-                .anointIf(val -> val.indexOf(val.length() - 1) != '/', val -> val + "/")
+                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
+                    d.ci("constructor", "TGS_StringUtils::isNullOrEmpty", "set as '/'");
+                    return "/";
+                })
+                .anointIf(val -> val.charAt(0) != '/', val -> {
+                    d.ci("constructor", "val.charAt(0) != '/'", "add '/' to the left");
+                    return "/" + val;
+                })
+                .anointIf(val -> val.charAt(val.length() - 1) != '/', val -> {
+                    d.ci("constructor", "val.charAt(val.length() - 1) != '/'", "add '/' to the right");
+                    return val + "/";
+                })
                 .coronate();
         d.ci("constructor", "slash_path_slash", slash_path_slash);
         this.allow = allow;

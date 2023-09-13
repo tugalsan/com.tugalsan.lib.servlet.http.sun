@@ -37,16 +37,16 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(TS_CharSetUtils.makePrintable(uri.toString())));
-                if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
-                    d.ce("handle", "ERROR: hack detected ⚠", parser.path.toString_url());
-                    TS_SHttpUtils.sendError404(httpExchange);
-                    return;
-                }
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
                         d.ci("handle", "param", param);
                     });
+                }
+                if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
+                    d.ce("handle", "ERROR: hack detected ⚠", parser.path.toString_url());
+                    TS_SHttpUtils.sendError404(httpExchange);
+                    return;
                 }
                 //GET PAYLOAD
                 var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);

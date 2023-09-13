@@ -2,6 +2,7 @@ package com.tugalsan.api.servlet.http.server;
 
 import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
+import com.tugalsan.api.charset.server.TS_CharSetUtils;
 import com.tugalsan.api.file.client.TGS_FileTypes;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.tuple.client.TGS_Tuple2;
@@ -34,7 +35,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                     TS_SHttpUtils.sendError404(httpExchange);
                     return;
                 }
-                var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                var parser = TGS_UrlParser.of(TGS_Url.of(TS_CharSetUtils.makePrintable(uri.toString())));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {

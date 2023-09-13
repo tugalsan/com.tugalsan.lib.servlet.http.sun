@@ -98,6 +98,7 @@ public class TS_SHttpServer {
         d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
         httpServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
             try (httpExchange) {
+                d.ci("addHandlerFile", "hello");
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
                     d.ce("addHandlerFile", "ERROR sniff url from httpExchange is null");

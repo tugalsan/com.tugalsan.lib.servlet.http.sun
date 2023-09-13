@@ -27,6 +27,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
 
     @Override
     public void handle(HttpExchange httpExchange) {
+        d.ci("handle", "hello");
         TGS_UnSafe.run(() -> {
             try (httpExchange) {
                 //PARSER

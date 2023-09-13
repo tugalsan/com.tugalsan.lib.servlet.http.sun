@@ -90,7 +90,7 @@ public class TS_SHttpServer {
         });
     }
 
-    private static void addHanders(HttpServer httpServer, TS_SHttpHandlerAbstract... handlers) {
+    private static void addHanders(HttpsServer httpServer, TS_SHttpHandlerAbstract... handlers) {
         Arrays.stream(handlers).forEach(handler -> httpServer.createContext(handler.slash_path, handler));
     }
 
@@ -157,10 +157,10 @@ public class TS_SHttpServer {
         });
     }
 
-    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandler, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
-            if (fileHandler.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandler.root)) {
-                d.ce("of", "ERROR: fileHandler.root not exists", fileHandler.root);
+            if (fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)) {
+                d.ce("of", "ERROR: fileHandler.root not exists", fileHandlerConfig.root);
                 return false;
             }
             var sslContext = createSSLContext(ssl); //create ssl server
@@ -173,8 +173,8 @@ public class TS_SHttpServer {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;
             }
-            if (fileHandler.root != null) {
-                addHandlerFile(httpsServer, fileHandler);
+            if (fileHandlerConfig.root != null) {
+                addHandlerFile(httpsServer, fileHandlerConfig);
             }
             addHanders(httpsServer, customHandlers);
             start(httpsServer);

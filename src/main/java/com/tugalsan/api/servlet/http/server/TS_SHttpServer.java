@@ -182,11 +182,11 @@ public class TS_SHttpServer {
             if (!ssl.redirectToSSL) {
                 return true;
             }
-            var publicNetwork = network.cloneIt().setPort(80);
+            var redirectNetwork = network.cloneIt().setPort(80);
             var httpServer = createHttpServer(network.cloneIt().setPort(80));
             addHandlerRedirect(httpServer, network);
             start(httpServer);
-            d.ci("of", "public server started", publicNetwork);
+            d.ci("of", "redirect server started", redirectNetwork);
             return true;
         }, e -> {
             d.ce("startHttpsServlet", e);

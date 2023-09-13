@@ -178,7 +178,7 @@ public class TS_SHttpServer {
             }
             addHanders(httpsServer, customHandlers);
             start(httpsServer);
-            d.ci("of", "ssl server started", network);
+            d.ci("of", "httpsServer started", network);
             if (!ssl.redirectToSSL) {
                 return true;
             }
@@ -186,7 +186,7 @@ public class TS_SHttpServer {
             var redirectServer = createHttpServer(network.cloneIt().setPort(80));
             addHandlerRedirect(redirectServer, network);
             start(redirectServer);
-            d.ci("of", "redirect server started", redirectNetwork);
+            d.ci("of", "redirectServer started", redirectNetwork);
             return true;
         }, e -> {
             d.ce("startHttpsServlet", e);

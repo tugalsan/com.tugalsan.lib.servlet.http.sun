@@ -27,9 +27,9 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
 
     @Override
     public void handle(HttpExchange httpExchange) {
-        d.ci("handle", "hello");
         TGS_UnSafe.run(() -> {
             try (httpExchange) {
+                d.ci("handle", "hello");
                 //PARSER
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
                 if (uri == null) {
@@ -37,7 +37,9 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
-                var parser = TGS_UrlParser.of(TGS_Url.of(TS_CharSetUtils.makePrintable(uri.toString())));
+//                var requestPath = TS_CharSetUtils.makePrintable(uri.toString())
+                var requestPath = uri.getPath();
+                var parser = TGS_UrlParser.of(TGS_Url.of(requestPath));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {

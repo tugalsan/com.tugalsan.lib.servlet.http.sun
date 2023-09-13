@@ -52,13 +52,19 @@ public class TS_SHttpServer {
         });
     }
 
-    private static HttpServer createServer(TS_SHttpConfigNetwork network, SSLContext sslContext) {
+    private static HttpServer createHttpServer(TS_SHttpConfigNetwork network) {
         return TGS_UnSafe.call(() -> {
-            if (sslContext == null) {
-                return network.ip == null
-                        ? HttpServer.create(new InetSocketAddress(network.port), 0)
-                        : HttpServer.create(new InetSocketAddress(network.ip, network.port), 0);
-            }
+            return network.ip == null
+                    ? HttpServer.create(new InetSocketAddress(network.port), 0)
+                    : HttpServer.create(new InetSocketAddress(network.ip, network.port), 0);
+        }, e -> {
+            d.ce("createHttpServer", e);
+            return null;
+        });
+    }
+
+    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork network, SSLContext sslContext) {
+        return TGS_UnSafe.call(() -> {
             var server = network.ip == null
                     ? HttpsServer.create(new InetSocketAddress(network.port), 0)//InetAddress.getLoopbackAddress() , 2
                     : HttpsServer.create(new InetSocketAddress(network.ip, network.port), 0);//, 2
@@ -79,7 +85,7 @@ public class TS_SHttpServer {
             });
             return server;
         }, e -> {
-            d.ce("createServer", e);
+            d.ce("createHttpsServer", e);
             return null;
         });
     }
@@ -93,10 +99,10 @@ public class TS_SHttpServer {
         httpServer.start();
     }
 
-    private static void addHandlerFile(HttpServer httpServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
+    private static void addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerConfig.root);
         d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
-        httpServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
+        httpsServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
             try (httpExchange) {
                 d.ci("addHandlerFile", "hello");
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
@@ -104,24 +110,25 @@ public class TS_SHttpServer {
                     TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "ERROR sniff url from httpExchange is null");
                     return;
                 }
+//                var requestPath = TS_CharSetUtils.makePrintable(uri.toString())
                 var requestPath = uri.getPath();
                 if (!TS_FileUtils.isExistFile(Path.of(requestPath))) {
                     TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "FileNotExists" + requestPath);
                     return;
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
-                if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
-                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "isHackedUrl? " + parser.path.toString_url());
-                    return;
-                }
                 if (d.infoEnable) {
                     d.ci("addHandlerFile", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
                         d.ci("addHandlerFile", "param", param);
                     });
                 }
-                var request = TS_SHttpHandlerRequest.of(httpExchange, parser);
-                if (!fileHandlerConfig.allow.validate(request)) {
+                if (TGS_UrlUtils.isHackedUrl(TGS_Url.of(parser.path.fileOrServletName))) {
+                    TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "isHackedUrl? " + parser.path.toString_url());
+                    return;
+                }
+                var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);
+                if (!fileHandlerConfig.allow.validate(requestBall)) {
                     return;
                 }
                 fileHandler.handle(httpExchange);
@@ -161,7 +168,7 @@ public class TS_SHttpServer {
                 d.ce("of", "ERROR: createSSLContext returned null");
                 return false;
             }
-            var httpsServer = createServer(network, sslContext);
+            var httpsServer = createHttpsServer(network, sslContext);
             if (httpsServer == null) {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;
@@ -175,7 +182,7 @@ public class TS_SHttpServer {
             if (!ssl.redirectToSSL) {
                 return true;
             }
-            var httpServer = createServer(network.cloneIt().setPort(80), null);
+            var httpServer = createHttpServer(network.cloneIt().setPort(80));
             addHandlerRedirect(httpServer, network);
             start(httpServer);
             return true;

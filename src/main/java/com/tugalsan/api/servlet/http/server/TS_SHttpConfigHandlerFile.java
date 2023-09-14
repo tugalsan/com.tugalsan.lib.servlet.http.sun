@@ -10,7 +10,7 @@ public class TS_SHttpConfigHandlerFile {
 
     final private static TS_Log d = TS_Log.of(true, TS_SHttpConfigHandlerFile.class);
 
-    public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root) {
+    public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         this.slash_path_slash = TGS_Coronator.ofStr()
                 .anoint(val -> slash_path_slash)
                 .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
@@ -29,12 +29,14 @@ public class TS_SHttpConfigHandlerFile {
         d.ci("constructor", "slash_path_slash", slash_path_slash);
         this.allow = allow;
         this.root = root;
+        this.filterUrlsWithHiddenChars = filterUrlsWithHiddenChars;
     }
     final public String slash_path_slash;
     final public TGS_ValidatorType1<TS_SHttpHandlerRequest> allow;
     final public Path root;
+    final public boolean filterUrlsWithHiddenChars;
 
-    public static TS_SHttpConfigHandlerFile of(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root) {
-        return new TS_SHttpConfigHandlerFile(slash_path_slash, allow, root);
+    public static TS_SHttpConfigHandlerFile of(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
+        return new TS_SHttpConfigHandlerFile(slash_path_slash, allow, root, filterUrlsWithHiddenChars);
     }
 }

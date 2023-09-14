@@ -17,12 +17,14 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
 
     final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerString.class);
 
-    private TS_SHttpHandlerString(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
+    private TS_SHttpHandlerString(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
+        this.removeHiddenChars = removeHiddenChars;
     }
+    final public boolean removeHiddenChars;
 
-    public static TS_SHttpHandlerString of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request) {
-        return new TS_SHttpHandlerString(slash_path, allow, request);
+    public static TS_SHttpHandlerString of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
+        return new TS_SHttpHandlerString(slash_path, allow, request, removeHiddenChars);
     }
 
     @Override
@@ -37,8 +39,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
-//                var requestPath = TS_CharSetUtils.makePrintable(uri.toString())
-                var requestPath = uri.getPath();
+                var requestPath = removeHiddenChars ? TS_CharSetUtils.makePrintable(uri.getPath()) : uri.getPath();
                 var parser = TGS_UrlParser.of(TGS_Url.of(requestPath));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);

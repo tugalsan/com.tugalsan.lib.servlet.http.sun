@@ -78,10 +78,7 @@ public class TS_SHttpServer {
                         params.setCipherSuites(newEngine.getEnabledCipherSuites());
                         params.setProtocols(newEngine.getEnabledProtocols());
                         params.setSSLParameters(getSSLContext().getSupportedSSLParameters());
-                    }, e -> {
-                        System.out.println("Failed to create HTTPS port");
-                        System.out.println(e.getMessage());
-                    });
+                    }, e -> d.ct("createHttpsServer", e));
                 }
             });
             return server;
@@ -155,11 +152,11 @@ public class TS_SHttpServer {
                 parser.protocol.value = "https://";
                 parser.host.port = network.port;
                 var redirectUrl = parser.toString();
-                d.ci("handle", "redirectUrl", redirectUrl);
+                d.ci("addHandlerRedirect", "redirectUrl", redirectUrl);
                 httpExchange.getResponseHeaders().set("Location", redirectUrl);
                 TGS_UnSafe.run(() -> {
                     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
-                }, e -> d.ct("handle", e));
+                }, e -> d.ct("addHandlerRedirect", e));
             }
         });
     }
@@ -195,7 +192,7 @@ public class TS_SHttpServer {
             d.ci("of", network.cloneIt().setPort(80), "redirectServer started");
             return true;
         }, e -> {
-            d.ce("startHttpsServlet", e);
+            d.ce("of", e);
             return false;
         });
     }

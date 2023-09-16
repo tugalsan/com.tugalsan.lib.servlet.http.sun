@@ -39,8 +39,8 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
-                var requestPath = removeHiddenChars ? TS_CharSetUtils.makePrintable(uri.getPath()) : uri.getPath();
-                var parser = TGS_UrlParser.of(TGS_Url.of(requestPath));
+                var requestUrlString = removeHiddenChars ? TS_CharSetUtils.makePrintable(uri.toString()) : uri.toString();
+                var parser = TGS_UrlParser.of(TGS_Url.of(requestUrlString));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {

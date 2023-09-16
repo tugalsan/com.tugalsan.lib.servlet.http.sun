@@ -13,18 +13,18 @@ import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.charset.*;
 
-public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
+public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerString.class);
+    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerByte.class);
 
-    private TS_SHttpHandlerString(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
+    private TS_SHttpHandlerByte(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
         this.removeHiddenChars = removeHiddenChars;
     }
     final public boolean removeHiddenChars;
 
-    public static TS_SHttpHandlerString of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
-        return new TS_SHttpHandlerString(slash_path, allow, request, removeHiddenChars);
+    public static TS_SHttpHandlerByte of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
+        return new TS_SHttpHandlerByte(slash_path, allow, request, removeHiddenChars);
     }
 
     @Override
@@ -53,9 +53,26 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                 }
                 //GET PAYLOAD
                 var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);
-                TGS_Tuple2<TGS_FileTypes, String> payload = allow.validate(requestBall)
-                        ? request.call(requestBall)
-                        : TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");
+                if (!allow.validate(requestBall)) {
+                    TGS_Tuple2<TGS_FileTypes, String> payload = TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");;
+                    if (payload == null || payload.value0 == null || payload.value1 == null) {
+                        return;
+                    }
+                    {//SET HEADER
+                        var headers = httpExchange.getResponseHeaders();
+                        headers.add("Access-Control-Allow-Origin", "*");
+                        headers.set("Content-Type", payload.value0.content);
+                    }
+                    {//SEND DATA
+                        var data = payload.value1.getBytes(StandardCharsets.UTF_8);
+                        httpExchange.sendResponseHeaders(200, data.length);
+                        try (var responseBody = httpExchange.getResponseBody()) {
+                            responseBody.write(data);
+                        }
+                    }
+                    return;
+                }
+                TGS_Tuple2<TGS_FileTypes, byte[]> payload = request.call(requestBall);
                 if (payload == null || payload.value0 == null || payload.value1 == null) {
                     return;
                 }
@@ -65,7 +82,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                     headers.set("Content-Type", payload.value0.content);
                 }
                 {//SEND DATA
-                    var data = payload.value1.getBytes(StandardCharsets.UTF_8);
+                    var data = payload.value1;
                     httpExchange.sendResponseHeaders(200, data.length);
                     try (var responseBody = httpExchange.getResponseBody()) {
                         responseBody.write(data);

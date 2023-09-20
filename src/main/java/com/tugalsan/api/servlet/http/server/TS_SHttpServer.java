@@ -101,6 +101,9 @@ public class TS_SHttpServer {
     }
 
     private static void addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
+        if (fileHandlerConfig == null || fileHandlerConfig.root == null) {
+            return;
+        }
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerConfig.root);
         d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
         httpsServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
@@ -177,9 +180,7 @@ public class TS_SHttpServer {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;
             }
-            if (fileHandlerConfig.root != null) {
-                addHandlerFile(httpsServer, fileHandlerConfig);
-            }
+            addHandlerFile(httpsServer, fileHandlerConfig);
             addCustomHanders(httpsServer, customHandlers);
             start(httpsServer);
             d.ci("of", network, "httpsServer started");

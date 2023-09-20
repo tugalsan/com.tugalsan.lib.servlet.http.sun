@@ -100,9 +100,13 @@ public class TS_SHttpServer {
         httpServer.start();
     }
 
-    private static void addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
-        if (fileHandlerConfig == null || fileHandlerConfig.root == null) {
-            return;
+    private static boolean addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
+        if (fileHandlerConfig == null) {
+            return true;
+        }
+        if (fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)) {
+            d.ce("of", "ERROR: fileHandler.root not exists", fileHandlerConfig.root);
+            return false;
         }
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerConfig.root);
         d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
@@ -141,6 +145,7 @@ public class TS_SHttpServer {
                 fileHandler.handle(httpExchange);
             }
         });
+        return true;
     }
 
     private static void addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork network) {
@@ -166,10 +171,6 @@ public class TS_SHttpServer {
 
     public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
-            if (fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)) {
-                d.ce("of", "ERROR: fileHandler.root not exists", fileHandlerConfig.root);
-                return false;
-            }
             var sslContext = createSSLContext(ssl); //create ssl server
             if (sslContext == null) {
                 d.ce("of", "ERROR: createSSLContext returned null");
@@ -180,7 +181,9 @@ public class TS_SHttpServer {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;
             }
-            addHandlerFile(httpsServer, fileHandlerConfig);
+            if (!addHandlerFile(httpsServer, fileHandlerConfig)) {
+                return false;
+            }
             addCustomHanders(httpsServer, customHandlers);
             start(httpsServer);
             d.ci("of", network, "httpsServer started");

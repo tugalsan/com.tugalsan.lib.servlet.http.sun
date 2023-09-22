@@ -12,6 +12,7 @@ import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.charset.*;
+import java.util.Objects;
 
 public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
 
@@ -53,7 +54,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                 }
                 if (Objects.equals(parser.path.fileOrServletName, "favicon.ico")){
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR: hack detected ⚠ " + parser.path.toString_url());
-                    return
+                    return;
                 }
                 //GET PAYLOAD
                 var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);

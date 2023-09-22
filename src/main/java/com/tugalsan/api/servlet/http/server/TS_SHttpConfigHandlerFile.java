@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 public class TS_SHttpConfigHandlerFile {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpConfigHandlerFile.class);
+    final private static TS_Log d = TS_Log.of(false, TS_SHttpConfigHandlerFile.class);
 
     public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         this.slash_path_slash = TGS_Coronator.ofStr()

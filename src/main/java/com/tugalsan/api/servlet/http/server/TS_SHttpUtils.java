@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class TS_SHttpUtils {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpUtils.class);
+    final private static TS_Log d = TS_Log.of(false, TS_SHttpUtils.class);
 
     public static boolean isLocal(HttpExchange httpExchange) {
         return Objects.equals(

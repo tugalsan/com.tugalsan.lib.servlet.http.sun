@@ -1,12 +1,9 @@
 package com.tugalsan.api.servlet.http.server;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 
 public class TS_SHttpHandlerRequest {
-
-    final private static TS_Log d = TS_Log.of(TS_SHttpHandlerRequest.class);
 
     private TS_SHttpHandlerRequest(HttpExchange httpExchange, TGS_UrlParser url) {
         this.httpExchange = httpExchange;

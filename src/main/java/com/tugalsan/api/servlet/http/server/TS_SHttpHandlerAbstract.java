@@ -11,7 +11,7 @@ import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 
 public abstract class TS_SHttpHandlerAbstract<T> implements HttpHandler {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerAbstract.class);
+    final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerAbstract.class);
 
     final public String slash_path;
     final protected TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, T>, TS_SHttpHandlerRequest> request;

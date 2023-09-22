@@ -19,7 +19,7 @@ import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 
 public class TS_SHttpServer {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpServer.class);
+    final private static TS_Log d = TS_Log.of(false, TS_SHttpServer.class);
 
     // The keystore is generated using the following three files:
     //    - private_key.key

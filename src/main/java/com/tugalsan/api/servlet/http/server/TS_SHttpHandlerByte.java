@@ -15,7 +15,7 @@ import java.nio.charset.*;
 
 public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
 
-    final private static TS_Log d = TS_Log.of(true, TS_SHttpHandlerByte.class);
+    final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerByte.class);
 
     private TS_SHttpHandlerByte(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);

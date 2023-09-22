@@ -53,7 +53,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                     return;
                 }
                 if (Objects.equals(parser.path.fileOrServletName, "favicon.ico")){
-                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR: hack detected ⚠ " + parser.path.toString_url());
+                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "INFO: favicon skipped " + parser.path.toString_url());
                     return;
                 }
                 //GET PAYLOAD

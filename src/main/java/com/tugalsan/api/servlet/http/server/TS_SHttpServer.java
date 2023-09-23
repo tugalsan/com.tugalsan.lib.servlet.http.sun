@@ -90,7 +90,7 @@ public class TS_SHttpServer {
 
     private static void addCustomHanders(HttpsServer httpServer, TS_SHttpHandlerAbstract... handlers) {
         Arrays.stream(handlers).forEach(handler -> {
-            d.ce("addCustomHanders", handler.slash_path, handler.getClass().getSimpleName());
+            d.ci("addCustomHanders", handler.slash_path, handler.getClass().getSimpleName());
             httpServer.createContext(handler.slash_path, handler);
         });
     }

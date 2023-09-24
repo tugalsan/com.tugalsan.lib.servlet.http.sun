@@ -17,7 +17,7 @@ public class TS_SHttpHandlerRequest {
     }
 
     final public boolean isLocal() {
-        return TS_SHttpUtils.isLocal(httpExchange);
+        return TS_SHttpUtils.isLocalHost(httpExchange);
     }
 
     final public void sendError404(CharSequence funcName, CharSequence consoleErrorMessage) {

@@ -3,7 +3,7 @@ package com.tugalsan.api.servlet.http.server;
 import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
 import com.tugalsan.api.charset.server.TS_CharSetUtils;
-import com.tugalsan.api.crypto.client.TGS_CryptUtils;
+//import com.tugalsan.api.crypto.client.TGS_CryptUtils;
 import com.tugalsan.api.file.client.TGS_FileTypes;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.tuple.client.TGS_Tuple2;
@@ -16,12 +16,12 @@ import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerByte.class);
-    final private static TGS_Tuple2<TGS_FileTypes, byte[]> payloadBogus = TGS_Tuple2.of(
-            TGS_FileTypes.jpeg,
-            TGS_CryptUtils.decrypt64_toBytes(
-                    TS_SHttpUtils.testJpgBase64()
-            )
-    );
+//    final private static TGS_Tuple2<TGS_FileTypes, byte[]> payloadBogus = TGS_Tuple2.of(
+//            TGS_FileTypes.jpeg,
+//            TGS_CryptUtils.decrypt64_toBytes(
+//                    TS_SHttpUtils.testJpgBase64()
+//            )
+//    );
 
     private TS_SHttpHandlerByte(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
@@ -61,9 +61,6 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                 var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);
                 if (!allow.validate(requestBall)) {
                     TGS_Tuple2<TGS_FileTypes, String> payload = TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");;
-                    if (payload == null || payload.value0 == null || payload.value1 == null) {
-                        return;
-                    }
                     {//SET HEADER
                         var headers = httpExchange.getResponseHeaders();
                         headers.add("Access-Control-Allow-Origin", "*");
@@ -81,7 +78,7 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                 }
                 TGS_Tuple2<TGS_FileTypes, byte[]> payload = request.call(requestBall);
                 if (payload == null || payload.value0 == null || payload.value1 == null || payload.value1.length == 0) {
-                    payload = payloadBogus;
+                    return;
                 }
                 {//SET HEADER
                     var headers = httpExchange.getResponseHeaders();

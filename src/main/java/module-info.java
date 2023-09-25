@@ -2,6 +2,7 @@ module com.tugalsan.api.servlet.http {
     requires jdk.httpserver;
     requires gwt.user;
     requires com.tugalsan.api.runnable;
+    requires com.tugalsan.api.crypto;
     requires com.tugalsan.api.callable;
     requires com.tugalsan.api.coronator;
     requires com.tugalsan.api.tuple;

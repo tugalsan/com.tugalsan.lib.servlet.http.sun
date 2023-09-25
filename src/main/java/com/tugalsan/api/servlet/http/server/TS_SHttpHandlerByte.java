@@ -3,6 +3,7 @@ package com.tugalsan.api.servlet.http.server;
 import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
 import com.tugalsan.api.charset.server.TS_CharSetUtils;
+import com.tugalsan.api.crypto.client.TGS_CryptUtils;
 import com.tugalsan.api.file.client.TGS_FileTypes;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.tuple.client.TGS_Tuple2;
@@ -11,11 +12,16 @@ import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
 import com.tugalsan.api.validator.client.TGS_ValidatorType1;
-import java.nio.charset.*;
 
 public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerByte.class);
+    final private static TGS_Tuple2<TGS_FileTypes, byte[]> payloadBogus = TGS_Tuple2.of(
+            TGS_FileTypes.jpeg,
+            TGS_CryptUtils.decrypt64_toBytes(
+                    TS_SHttpUtils.testJpgBase64()
+            )
+    );
 
     private TS_SHttpHandlerByte(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
@@ -64,7 +70,8 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                         headers.set("Content-Type", payload.value0.content);
                     }
                     {//SEND DATA
-                        var data = payload.value1.getBytes(StandardCharsets.UTF_8);
+                        //var data = payload.value1.getBytes(StandardCharsets.UTF_8);
+                        var data = payload.value1.getBytes();
                         httpExchange.sendResponseHeaders(200, data.length);
                         try (var responseBody = httpExchange.getResponseBody()) {
                             responseBody.write(data);
@@ -73,8 +80,8 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                     return;
                 }
                 TGS_Tuple2<TGS_FileTypes, byte[]> payload = request.call(requestBall);
-                if (payload == null || payload.value0 == null || payload.value1 == null) {
-                    return;
+                if (payload == null || payload.value0 == null || payload.value1 == null || payload.value1.length == 0) {
+                    payload = payloadBogus;
                 }
                 {//SET HEADER
                     var headers = httpExchange.getResponseHeaders();

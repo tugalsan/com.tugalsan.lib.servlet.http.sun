@@ -10,7 +10,7 @@ public class TS_SHttpConfigHandlerFile {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpConfigHandlerFile.class);
 
-    public TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
+    private TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         this.slash_path_slash = TGS_Coronator.ofStr()
                 .anoint(val -> slash_path_slash)
                 .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
@@ -38,5 +38,13 @@ public class TS_SHttpConfigHandlerFile {
 
     public static TS_SHttpConfigHandlerFile of(String slash_path_slash, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         return new TS_SHttpConfigHandlerFile(slash_path_slash, allow, root, filterUrlsWithHiddenChars);
+    }
+
+    public static TS_SHttpConfigHandlerFile ofEmpty() {
+        return new TS_SHttpConfigHandlerFile(null, null, null, false);
+    }
+
+    public boolean isEmpty() {
+        return slash_path_slash == null;
     }
 }

@@ -101,7 +101,7 @@ public class TS_SHttpServer {
     }
 
     private static boolean addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
-        if (fileHandlerConfig == null) {
+        if (fileHandlerConfig == null || fileHandlerConfig.isEmpty()) {
             return true;
         }
         if (fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)) {

@@ -45,6 +45,6 @@ public class TS_SHttpConfigHandlerFile {
     }
 
     public boolean isEmpty() {
-        return slash_path_slash == null;
+        return root == null;
     }
 }

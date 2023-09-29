@@ -196,7 +196,7 @@ public class TS_SHttpServer {
             d.ci("of", network.cloneIt().setPort(80), "redirectServer started");
             return true;
         }, e -> {
-            d.ce("of", e);
+            d.ct("of", e);
             return false;
         });
     }

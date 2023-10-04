@@ -4,6 +4,8 @@ import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
 import com.tugalsan.api.charset.server.TS_CharSetUtils;
 import com.tugalsan.api.file.client.TGS_FileTypes;
+import com.tugalsan.api.file.server.TS_FileUtils;
+import com.tugalsan.api.file.server.TS_PathUtils;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.tuple.client.TGS_Tuple2;
 import com.tugalsan.api.unsafe.client.TGS_UnSafe;
@@ -52,8 +54,26 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR: hack detected ⚠ " + parser.path.toString_url());
                     return;
                 }
-                if (Objects.equals(parser.path.fileOrServletName, "favicon.ico")){
-                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "INFO: favicon skipped " + parser.path.toString_url());
+                if (Objects.equals(parser.path.fileOrServletName, "favicon.ico")) {
+//                    TS_SHttpUtils.sendError404(httpExchange, "handle.string", "INFO: favicon skipped " + parser.path.toString_url());
+                    var pathFavicon = TS_PathUtils.getPathCurrent_nio(parser.path.fileOrServletName);
+                    var bytesFavicon = TS_FileUtils.read(pathFavicon);
+                    TGS_Tuple2<TGS_FileTypes, byte[]> payload = TGS_Tuple2.of(TGS_FileTypes.ico, bytesFavicon);
+                    if (payload == null || payload.value0 == null || payload.value1 == null || payload.value1.length == 0) {
+                        return;
+                    }
+                    {//SET HEADER
+                        var headers = httpExchange.getResponseHeaders();
+                        headers.add("Access-Control-Allow-Origin", "*");
+                        headers.set("Content-Type", payload.value0.content);
+                    }
+                    {//SEND DATA
+                        var data = payload.value1;
+                        httpExchange.sendResponseHeaders(200, data.length);
+                        try (var responseBody = httpExchange.getResponseBody()) {
+                            responseBody.write(data);
+                        }
+                    }
                     return;
                 }
                 //GET PAYLOAD

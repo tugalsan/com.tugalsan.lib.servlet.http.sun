@@ -22,11 +22,19 @@ public class TS_SHttpUtils {
     }
 
     public static boolean isLocalClient(HttpExchange httpExchange) {
-        var clientIp = httpExchange.getRemoteAddress().getHostName();
+        var clientIp0 = httpExchange.getRemoteAddress().getHostName();
+        var clientIp1 = httpExchange.getRemoteAddress().getAddress().getHostAddress();
+        var clientIp2 = httpExchange.getRemoteAddress().getAddress().getHostName();
         return isLocalHost(httpExchange)
-                || TGS_NetworkIPUtils.isLocalClient("192.168.5.14", clientIp)
-                || TGS_NetworkIPUtils.isLocalClient("192.168.7.1", clientIp)
-                || TGS_NetworkIPUtils.isLocalClient("10.0.0.10", clientIp);
+                || TGS_NetworkIPUtils.isLocalClient("192.168.5.14", clientIp0)
+                || TGS_NetworkIPUtils.isLocalClient("192.168.7.1", clientIp0)
+                || TGS_NetworkIPUtils.isLocalClient("10.0.0.10", clientIp0)
+                || TGS_NetworkIPUtils.isLocalClient("192.168.5.14", clientIp1)
+                || TGS_NetworkIPUtils.isLocalClient("192.168.7.1", clientIp1)
+                || TGS_NetworkIPUtils.isLocalClient("10.0.0.10", clientIp1)
+                || TGS_NetworkIPUtils.isLocalClient("192.168.5.14", clientIp2)
+                || TGS_NetworkIPUtils.isLocalClient("192.168.7.1", clientIp2)
+                || TGS_NetworkIPUtils.isLocalClient("10.0.0.10", clientIp2);
     }
 
     public static Optional<URI> getURI(HttpExchange httpExchange) {

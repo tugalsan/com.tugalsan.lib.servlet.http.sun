@@ -96,7 +96,7 @@ public class TS_SHttpServer {
     }
 
     private static void start(HttpServer httpServer) {
-        httpServer.setExecutor(Executors.newCachedThreadPool(Thread.ofVirtual().factory()));
+        httpServer.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         httpServer.start();
     }
 

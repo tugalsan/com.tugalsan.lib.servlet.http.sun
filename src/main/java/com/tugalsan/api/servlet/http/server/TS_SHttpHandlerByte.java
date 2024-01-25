@@ -60,7 +60,7 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                 //GET PAYLOAD
                 var requestBall = TS_SHttpHandlerRequest.of(httpExchange, parser);
                 if (!allow.validate(requestBall)) {
-                    TGS_Tuple2<TGS_FileTypes, String> payload = TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");;
+                    TGS_Tuple2<TGS_FileTypes, String> payload = TGS_Tuple2.of(TGS_FileTypes.txt_utf8, "ERROR NOT_ALLOWED 👮");
                     {//SET HEADER
                         var headers = httpExchange.getResponseHeaders();
                         headers.add("Access-Control-Allow-Origin", "*");

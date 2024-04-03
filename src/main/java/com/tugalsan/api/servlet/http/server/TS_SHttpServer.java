@@ -64,7 +64,7 @@ public class TS_SHttpServer {
         });
     }
 
-    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork networkConfig, SSLContext sslContext, TS_SHttpConfigSSL sslConfig) {
+    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork networkConfig, SSLContext sslContext) {
         return TGS_UnSafe.call(() -> {
             var server = networkConfig.ip == null
                     ? HttpsServer.create(new InetSocketAddress(networkConfig.port), 0)//InetAddress.getLoopbackAddress() , 2
@@ -83,8 +83,6 @@ public class TS_SHttpServer {
             });
             return server;
         }, e -> {
-            d.ce("createHttpsServer", "networkConfig", networkConfig);
-            d.ce("createHttpsServer", "sslConfig", sslConfig);
             d.ct("createHttpsServer", e);
             return null;
         });
@@ -178,7 +176,7 @@ public class TS_SHttpServer {
                 d.ce("of", "ERROR: createSSLContext returned null");
                 return false;
             }
-            var httpsServer = createHttpsServer(networkConfig, sslContext, sslConfig);
+            var httpsServer = createHttpsServer(networkConfig, sslContext);
             if (httpsServer == null) {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;

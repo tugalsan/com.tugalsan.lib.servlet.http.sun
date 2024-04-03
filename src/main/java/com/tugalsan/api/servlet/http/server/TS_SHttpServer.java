@@ -29,17 +29,17 @@ public class TS_SHttpServer {
     //    openssl pkcs12 -export -out keystore.pkcs12 -inkey private_key.key -certfile site.ca-bundle -in site.crt
     //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
     // initialise the keystore
-    private static SSLContext createSSLContext(TS_SHttpConfigSSL ssl) {
+    private static SSLContext createSSLContext(TS_SHttpConfigSSL sslConfig) {
         return TGS_UnSafe.call(() -> {
             //load keystore
             var ks = KeyStore.getInstance("PKCS12");
-            try (var fis = new FileInputStream(ssl.p12.toAbsolutePath().toString())) {
-                ks.load(fis, ssl.pass.toCharArray());
+            try (var fis = new FileInputStream(sslConfig.p12.toAbsolutePath().toString())) {
+                ks.load(fis, sslConfig.pass.toCharArray());
             }
 
             //convert keystore to key manager factories
             var kmf = KeyManagerFactory.getInstance("SunX509");
-            kmf.init(ks, ssl.pass.toCharArray());
+            kmf.init(ks, sslConfig.pass.toCharArray());
             var tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(ks);
 
@@ -53,22 +53,22 @@ public class TS_SHttpServer {
         });
     }
 
-    private static HttpServer createHttpServer(TS_SHttpConfigNetwork network) {
+    private static HttpServer createHttpServer(TS_SHttpConfigNetwork networkConfig) {
         return TGS_UnSafe.call(() -> {
-            return network.ip == null
-                    ? HttpServer.create(new InetSocketAddress(network.port), 0)
-                    : HttpServer.create(new InetSocketAddress(network.ip, network.port), 0);
+            return networkConfig.ip == null
+                    ? HttpServer.create(new InetSocketAddress(networkConfig.port), 0)
+                    : HttpServer.create(new InetSocketAddress(networkConfig.ip, networkConfig.port), 0);
         }, e -> {
             d.ce("createHttpServer", e);
             return null;
         });
     }
 
-    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork network, SSLContext sslContext) {
+    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork networkConfig, SSLContext sslContext, TS_SHttpConfigSSL sslConfig) {
         return TGS_UnSafe.call(() -> {
-            var server = network.ip == null
-                    ? HttpsServer.create(new InetSocketAddress(network.port), 0)//InetAddress.getLoopbackAddress() , 2
-                    : HttpsServer.create(new InetSocketAddress(network.ip, network.port), 0);//, 2
+            var server = networkConfig.ip == null
+                    ? HttpsServer.create(new InetSocketAddress(networkConfig.port), 0)//InetAddress.getLoopbackAddress() , 2
+                    : HttpsServer.create(new InetSocketAddress(networkConfig.ip, networkConfig.port), 0);//, 2
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
@@ -83,7 +83,9 @@ public class TS_SHttpServer {
             });
             return server;
         }, e -> {
-            d.ce("createHttpsServer", e);
+            d.ce("createHttpsServer", "networkConfig", networkConfig);
+            d.ce("createHttpsServer", "sslConfig", sslConfig);
+            d.ct("createHttpsServer", e);
             return null;
         });
     }
@@ -148,7 +150,7 @@ public class TS_SHttpServer {
         return true;
     }
 
-    private static void addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork network) {
+    private static void addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork networkConfig) {
         httpServer.createContext("/", httpExchange -> {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
@@ -158,7 +160,7 @@ public class TS_SHttpServer {
                 }
                 var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
                 parser.protocol.value = "https://";
-                parser.host.port = network.port;
+                parser.host.port = networkConfig.port;
                 var redirectUrl = parser.toString();
                 d.ci("addHandlerRedirect", "redirectUrl", redirectUrl);
                 httpExchange.getResponseHeaders().set("Location", redirectUrl);
@@ -169,14 +171,14 @@ public class TS_SHttpServer {
         });
     }
 
-    public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
+    public static boolean of(TS_SHttpConfigNetwork networkConfig, TS_SHttpConfigSSL sslConfig, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
         return TGS_UnSafe.call(() -> {
-            var sslContext = createSSLContext(ssl); //create ssl server
+            var sslContext = createSSLContext(sslConfig); //create ssl server
             if (sslContext == null) {
                 d.ce("of", "ERROR: createSSLContext returned null");
                 return false;
             }
-            var httpsServer = createHttpsServer(network, sslContext);
+            var httpsServer = createHttpsServer(networkConfig, sslContext, sslConfig);
             if (httpsServer == null) {
                 d.ce("of", "ERROR: createServer returned null");
                 return false;
@@ -186,14 +188,14 @@ public class TS_SHttpServer {
             }
             addCustomHanders(httpsServer, customHandlers);
             start(httpsServer);
-            d.ci("of", network, "httpsServer started");
-            if (!ssl.redirectToSSL) {
+            d.ci("of", networkConfig, "httpsServer started");
+            if (!sslConfig.redirectToSSL) {
                 return true;
             }
-            var redirectServer = createHttpServer(network.cloneIt().setPort(80));
-            addHandlerRedirect(redirectServer, network);
+            var redirectServer = createHttpServer(networkConfig.cloneIt().setPort(80));
+            addHandlerRedirect(redirectServer, networkConfig);
             start(redirectServer);
-            d.ci("of", network.cloneIt().setPort(80), "redirectServer started");
+            d.ci("of", networkConfig.cloneIt().setPort(80), "redirectServer started");
             return true;
         }, e -> {
             d.ct("of", e);

@@ -40,7 +40,7 @@ public class TS_SHttpConfigHandlerFile {
         return new TS_SHttpConfigHandlerFile(slash_path_slash, allow, root, filterUrlsWithHiddenChars);
     }
 
-    public static TS_SHttpConfigHandlerFile ofEmpty() {
+    public static TS_SHttpConfigHandlerFile ofEmpty_NullPointerException() {
         return new TS_SHttpConfigHandlerFile(null, null, null, false);
     }
 

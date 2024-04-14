@@ -12,10 +12,12 @@ import com.tugalsan.api.charset.server.TS_CharSetUtils;
 import com.tugalsan.api.file.server.TS_DirectoryUtils;
 import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.log.server.TS_Log;
-import com.tugalsan.api.unsafe.client.TGS_UnSafe;
+import com.tugalsan.api.union.client.TGS_UnionExcuse;
+import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
 import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
+import java.security.cert.CertificateException;
 
 public class TS_SHttpServer {
 
@@ -29,8 +31,8 @@ public class TS_SHttpServer {
     //    openssl pkcs12 -export -out keystore.pkcs12 -inkey private_key.key -certfile site.ca-bundle -in site.crt
     //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
     // initialise the keystore
-    private static SSLContext createSSLContext(TS_SHttpConfigSSL sslConfig) {
-        return TGS_UnSafe.call(() -> {
+    private static TGS_UnionExcuse<SSLContext> createSSLContext(TS_SHttpConfigSSL sslConfig) {
+        try {
             //load keystore
             var ks = KeyStore.getInstance("PKCS12");
             try (var fis = new FileInputStream(sslConfig.p12.toAbsolutePath().toString())) {
@@ -46,46 +48,41 @@ public class TS_SHttpServer {
             // create ssl Context
             var sslContext = SSLContext.getInstance("TLS");
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-            return sslContext;
-        }, e -> {
-            d.ce("createSSLContext", e);
-            return null;
-        });
+            return TGS_UnionExcuse.of(sslContext);
+        } catch (IOException | CertificateException | KeyManagementException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException ex) {
+            return TGS_UnionExcuse.ofExcuse(ex);
+        }
     }
 
-    private static HttpServer createHttpServer(TS_SHttpConfigNetwork networkConfig) {
-        return TGS_UnSafe.call(() -> {
-            return networkConfig.ip == null
+    private static TGS_UnionExcuse<HttpServer> createHttpServer(TS_SHttpConfigNetwork networkConfig) {
+        try {
+            return TGS_UnionExcuse.of(networkConfig.ip == null
                     ? HttpServer.create(new InetSocketAddress(networkConfig.port), 0)
-                    : HttpServer.create(new InetSocketAddress(networkConfig.ip, networkConfig.port), 0);
-        }, e -> {
-            d.ce("createHttpServer", e);
-            return null;
-        });
+                    : HttpServer.create(new InetSocketAddress(networkConfig.ip, networkConfig.port), 0));
+        } catch (IOException ex) {
+            return TGS_UnionExcuse.ofExcuse(ex);
+        }
     }
 
-    private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork networkConfig, SSLContext sslContext) {
-        return TGS_UnSafe.call(() -> {
+    private static TGS_UnionExcuse<HttpsServer> createHttpsServer(TS_SHttpConfigNetwork networkConfig, SSLContext sslContext) {
+        try {
             var server = networkConfig.ip == null
                     ? HttpsServer.create(new InetSocketAddress(networkConfig.port), 0)//InetAddress.getLoopbackAddress() , 2
                     : HttpsServer.create(new InetSocketAddress(networkConfig.ip, networkConfig.port), 0);//, 2
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
-                    TGS_UnSafe.run(() -> {
-                        var newEngine = getSSLContext().createSSLEngine();
-                        params.setNeedClientAuth(false);
-                        params.setCipherSuites(newEngine.getEnabledCipherSuites());
-                        params.setProtocols(newEngine.getEnabledProtocols());
-                        params.setSSLParameters(getSSLContext().getSupportedSSLParameters());
-                    }, e -> d.ct("createHttpsServer", e));
+                    var newEngine = getSSLContext().createSSLEngine();
+                    params.setNeedClientAuth(false);
+                    params.setCipherSuites(newEngine.getEnabledCipherSuites());
+                    params.setProtocols(newEngine.getEnabledProtocols());
+                    params.setSSLParameters(getSSLContext().getSupportedSSLParameters());
                 }
             });
-            return server;
-        }, e -> {
-            d.ct("createHttpsServer", e);
-            return null;
-        });
+            return TGS_UnionExcuse.of(server);
+        } catch (IOException ex) {
+            return TGS_UnionExcuse.ofExcuse(ex);
+        }
     }
 
     private static void addCustomHanders(HttpsServer httpServer, TS_SHttpHandlerAbstract... handlers) {
@@ -100,16 +97,18 @@ public class TS_SHttpServer {
         httpServer.start();
     }
 
-    private static boolean addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
+    private static TGS_UnionExcuseVoid addHandlerFile(HttpsServer httpsServer, TS_SHttpConfigHandlerFile fileHandlerConfig) {
         if (fileHandlerConfig == null || fileHandlerConfig.isEmpty()) {
-            return true;
+            return TGS_UnionExcuseVoid.ofExcuse(d.className, "addHandlerFile", "fileHandlerConfig == null || fileHandlerConfig.isEmpty()");
         }
         if (fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)) {
-            d.ce("of", "ERROR: fileHandler.root not exists", fileHandlerConfig.root);
-            return false;
+            return TGS_UnionExcuseVoid.ofExcuse(d.className, "addHandlerFile", "fileHandlerConfig.root != null && !TS_DirectoryUtils.isExistDirectory(fileHandlerConfig.root)");
         }
         var fileHandler = SimpleFileServer.createFileHandler(fileHandlerConfig.root);
         d.ci("addHandlerFile", "fileHandlerConfig.root", fileHandlerConfig.root);
+        var wrap = new Object() {
+            TGS_UnionExcuse<TGS_UrlParser> u_parser;
+        };
         httpsServer.createContext(fileHandlerConfig.slash_path_slash, httpExchange -> {
             try (httpExchange) {
                 d.ci("addHandlerFile", "hello");
@@ -127,7 +126,11 @@ public class TS_SHttpServer {
                     TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "FileNotExists" + requestPath);
                     return;
                 }
-                var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                wrap.u_parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                if (wrap.u_parser.isExcuse()) {
+                    return;
+                }
+                var parser = wrap.u_parser.value();
                 if (d.infoEnable) {
                     d.ci("addHandlerFile", "parser.toString", parser);
                     parser.quary.params.forEach(param -> {
@@ -145,10 +148,16 @@ public class TS_SHttpServer {
                 fileHandler.handle(httpExchange);
             }
         });
-        return true;
+        if (wrap.u_parser != null && wrap.u_parser.isExcuse()) {
+            return wrap.u_parser.toExcuseVoid();
+        }
+        return TGS_UnionExcuseVoid.ofVoid();
     }
 
-    private static void addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork networkConfig) {
+    private static TGS_UnionExcuseVoid addHandlerRedirect(HttpServer httpServer, TS_SHttpConfigNetwork networkConfig) {
+        var wrap = new Object() {
+            TGS_UnionExcuse<TGS_UrlParser> u_parser;
+        };
         httpServer.createContext("/", httpExchange -> {
             try (httpExchange) {
                 var uri = TS_SHttpUtils.getURI(httpExchange).orElse(null);
@@ -156,48 +165,54 @@ public class TS_SHttpServer {
                     TS_SHttpUtils.sendError404(httpExchange, "addHandlerRedirect", "ERROR sniff url from httpExchange is null");
                     return;
                 }
-                var parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                wrap.u_parser = TGS_UrlParser.of(TGS_Url.of(uri.toString()));
+                if (wrap.u_parser.isExcuse()) {
+                    return;
+                }
+                var parser = wrap.u_parser.value();
                 parser.protocol.value = "https://";
                 parser.host.port = networkConfig.port;
                 var redirectUrl = parser.toString();
                 d.ci("addHandlerRedirect", "redirectUrl", redirectUrl);
                 httpExchange.getResponseHeaders().set("Location", redirectUrl);
-                TGS_UnSafe.run(() -> {
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
-                }, e -> d.ct("addHandlerRedirect", e));
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
             }
         });
+        if (wrap.u_parser.isExcuse()) {
+            return wrap.u_parser.toExcuseVoid();
+        }
+        return TGS_UnionExcuseVoid.ofVoid();
     }
 
-    public static boolean of(TS_SHttpConfigNetwork networkConfig, TS_SHttpConfigSSL sslConfig, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
-        return TGS_UnSafe.call(() -> {
-            var sslContext = createSSLContext(sslConfig); //create ssl server
-            if (sslContext == null) {
-                d.ce("of", "ERROR: createSSLContext returned null");
-                return false;
-            }
-            var httpsServer = createHttpsServer(networkConfig, sslContext);
-            if (httpsServer == null) {
-                d.ce("of", "ERROR: createServer returned null");
-                return false;
-            }
-            if (!addHandlerFile(httpsServer, fileHandlerConfig)) {
-                return false;
-            }
-            addCustomHanders(httpsServer, customHandlers);
-            start(httpsServer);
-            d.ci("of", networkConfig, "httpsServer started");
-            if (!sslConfig.redirectToSSL) {
-                return true;
-            }
-            var redirectServer = createHttpServer(networkConfig.cloneIt().setPort(80));
-            addHandlerRedirect(redirectServer, networkConfig);
-            start(redirectServer);
-            d.ci("of", networkConfig.cloneIt().setPort(80), "redirectServer started");
-            return true;
-        }, e -> {
-            d.ct("of", e);
-            return false;
-        });
+    public static TGS_UnionExcuseVoid of(TS_SHttpConfigNetwork networkConfig, TS_SHttpConfigSSL sslConfig, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
+        var u_sslContext = createSSLContext(sslConfig); //create ssl server
+        if (u_sslContext.isExcuse()) {
+            return u_sslContext.toExcuseVoid();
+        }
+        var u_httpsServer = createHttpsServer(networkConfig, u_sslContext.value());
+        if (u_httpsServer.isExcuse()) {
+            return u_httpsServer.toExcuseVoid();
+        }
+        var u_addHandlerFile = addHandlerFile(u_httpsServer.value(), fileHandlerConfig);
+        if (u_addHandlerFile.isExcuse()) {
+            return u_addHandlerFile;
+        }
+        addCustomHanders(u_httpsServer.value(), customHandlers);
+        start(u_httpsServer.value());
+        d.ci("of", networkConfig, "httpsServer started");
+        if (!sslConfig.redirectToSSL) {
+            return TGS_UnionExcuseVoid.ofVoid();
+        }
+        var u_redirectServer = createHttpServer(networkConfig.cloneIt().setPort(80));
+        if (u_redirectServer.isExcuse()) {
+            return u_redirectServer.toExcuseVoid();
+        }
+        var u_redirect = addHandlerRedirect(u_redirectServer.value(), networkConfig);
+        if (u_redirect.isExcuse()) {
+            return u_redirect;
+        }
+        start(u_redirectServer.value());
+        d.ci("of", networkConfig.cloneIt().setPort(80), "redirectServer started");
+        return TGS_UnionExcuseVoid.ofVoid();
     }
 }

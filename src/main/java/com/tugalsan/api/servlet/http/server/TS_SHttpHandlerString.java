@@ -2,7 +2,7 @@ package com.tugalsan.api.servlet.http.server;
 
 import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
-import com.tugalsan.api.charset.server.TS_CharSetUtils;
+import com.tugalsan.api.charset.client.TGS_CharSet;
 import com.tugalsan.api.file.client.TGS_FileTypes;
 import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.file.server.TS_PathUtils;
@@ -42,7 +42,7 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
-                var requestUrlString = removeHiddenChars ? TS_CharSetUtils.makePrintable(uri.toString()) : uri.toString();
+                var requestUrlString = removeHiddenChars ? TGS_CharSet.jre().makePrintable(uri.toString()) : uri.toString();
                 var parser = TGS_UrlParser.of(TGS_Url.of(requestUrlString));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);

@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import javax.net.ssl.*;
 import com.sun.net.httpserver.*;
-import com.tugalsan.api.charset.server.TS_CharSetUtils;
+import com.tugalsan.api.charset.client.TGS_CharSet;
 import com.tugalsan.api.file.server.TS_DirectoryUtils;
 import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.log.server.TS_Log;
@@ -119,7 +119,7 @@ public class TS_SHttpServer {
                     return;
                 }
                 var requestPath = uri.getPath();
-                if (fileHandlerConfig.filterUrlsWithHiddenChars && !TS_CharSetUtils.isPrintable_slow(requestPath)) {
+                if (fileHandlerConfig.filterUrlsWithHiddenChars && !TGS_CharSet.jre().isPrintable_slow(requestPath)) {
                     TS_SHttpUtils.sendError404(httpExchange, "addHandlerFile", "non printable chars detected" + requestPath);
                     return;
                 }

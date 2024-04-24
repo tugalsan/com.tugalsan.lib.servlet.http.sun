@@ -2,8 +2,8 @@ package com.tugalsan.api.servlet.http.server;
 
 import com.sun.net.httpserver.*;
 import com.tugalsan.api.callable.client.*;
-import com.tugalsan.api.charset.server.TS_CharSetUtils;
-//import com.tugalsan.api.crypto.client.TGS_CryptUtils;
+import com.tugalsan.api.charset.client.TGS_CharSet;
+import com.tugalsan.api.charset.client.TGS_CharSetCast;
 import com.tugalsan.api.file.client.TGS_FileTypes;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.tuple.client.TGS_Tuple2;
@@ -16,12 +16,6 @@ import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerByte.class);
-//    final private static TGS_Tuple2<TGS_FileTypes, byte[]> payloadBogus = TGS_Tuple2.of(
-//            TGS_FileTypes.jpeg,
-//            TGS_CryptUtils.decrypt64_toBytes(
-//                    TS_SHttpUtils.testJpgBase64()
-//            )
-//    );
 
     private TS_SHttpHandlerByte(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, byte[]>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
@@ -45,7 +39,7 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                     TS_SHttpUtils.sendError404(httpExchange, "handle.string", "ERROR sniff url from httpExchange is null ⚠");
                     return;
                 }
-                var requestUrlString = removeHiddenChars ? TS_CharSetUtils.makePrintable(uri.toString()) : uri.toString();
+                var requestUrlString = removeHiddenChars ? TGS_CharSet.jre().makePrintable(uri.toString()) : uri.toString();
                 var parser = TGS_UrlParser.of(TGS_Url.of(requestUrlString));
                 if (d.infoEnable) {
                     d.ci("handle", "parser.toString", parser);

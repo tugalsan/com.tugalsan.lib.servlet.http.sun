@@ -87,6 +87,6 @@ public class TS_SHttpHandlerByte extends TS_SHttpHandlerAbstract<byte[]> {
                     }
                 }
             }
-        }, e -> e.printStackTrace());
+        }, e -> d.ct("handle", e));
     }
 }

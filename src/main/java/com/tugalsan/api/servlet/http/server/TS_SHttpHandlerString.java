@@ -97,6 +97,6 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
                     }
                 }
             }
-        }, e -> e.printStackTrace());
+        }, e -> d.ct("handle", e));
     }
 }

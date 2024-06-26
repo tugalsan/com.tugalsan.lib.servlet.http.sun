@@ -13,7 +13,7 @@ public class TS_SHttpConfigHandlerFile {
     private TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_CallableType1_Validate<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         this.slash_path_slash = TGS_CallableType1_Coronator.ofStr()
                 .anoint(val -> slash_path_slash)
-                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
+                .anointIf(TGS_StringUtils.cmn()::isNullOrEmpty, val -> {
                     d.ci("constructor", "TGS_StringUtils::isNullOrEmpty", "set as '/'");
                     return "/";
                 })

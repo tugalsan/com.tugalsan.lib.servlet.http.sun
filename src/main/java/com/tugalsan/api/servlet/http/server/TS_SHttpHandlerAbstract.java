@@ -18,7 +18,7 @@ public abstract class TS_SHttpHandlerAbstract<T> implements HttpHandler {
     protected TS_SHttpHandlerAbstract(String slash_path, TGS_CallableType1_Validate<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, T>, TS_SHttpHandlerRequest> request) {
         this.slash_path = TGS_CallableType1_Coronator.ofStr()
                 .anoint(val -> slash_path)
-                .anointIf(TGS_StringUtils::isNullOrEmpty, val -> {
+                .anointIf(TGS_StringUtils.cmn()::isNullOrEmpty, val -> {
                     d.ci("constructor", "TGS_StringUtils::isNullOrEmpty", "set as '/'");
                     return "/";
                 })

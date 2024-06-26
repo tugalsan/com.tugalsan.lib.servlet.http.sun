@@ -2,7 +2,7 @@ package com.tugalsan.api.servlet.http.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;
-import com.tugalsan.api.coronator.client.TGS_Coronator;
+import com.tugalsan.api.callable.client.TGS_CallableType1_Coronator;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
@@ -39,7 +39,7 @@ public class TS_SHttpUtils {
     }
 
     public static TGS_UnionExcuse<URI> getURI(HttpExchange httpExchange) {
-        var host = TGS_Coronator.ofStr()
+        var host = TGS_CallableType1_Coronator.ofStr()
                 .anoint(val -> httpExchange.getRequestHeaders().getFirst("Host"))
                 .anointIf(val -> val == null, val -> "localhost:" + httpExchange.getHttpContext().getServer().getAddress().getPort())
                 .coronate();

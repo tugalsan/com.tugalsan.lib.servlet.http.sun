@@ -12,7 +12,6 @@ import com.tugalsan.api.unsafe.client.TGS_UnSafe;
 import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
-import com.tugalsan.api.validator.client.TGS_ValidatorType1;
 import java.nio.charset.*;
 import java.util.Objects;
 
@@ -20,13 +19,13 @@ public class TS_SHttpHandlerString extends TS_SHttpHandlerAbstract<String> {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpHandlerString.class);
 
-    private TS_SHttpHandlerString(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
+    private TS_SHttpHandlerString(String slash_path, TGS_CallableType1_Validate<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         super(slash_path, allow, request);
         this.removeHiddenChars = removeHiddenChars;
     }
     final public boolean removeHiddenChars;
 
-    public static TS_SHttpHandlerString of(String slash_path, TGS_ValidatorType1<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
+    public static TS_SHttpHandlerString of(String slash_path, TGS_CallableType1_Validate<TS_SHttpHandlerRequest> allow, TGS_CallableType1<TGS_Tuple2<TGS_FileTypes, String>, TS_SHttpHandlerRequest> request, boolean removeHiddenChars) {
         return new TS_SHttpHandlerString(slash_path, allow, request, removeHiddenChars);
     }
 

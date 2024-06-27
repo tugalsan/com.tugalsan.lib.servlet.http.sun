@@ -2,7 +2,7 @@ module com.tugalsan.api.servlet.http {
     requires jdk.httpserver;
     
 //    requires com.tugalsan.api.crypto;
-    requires com.tugalsan.api.callable;
+    requires com.tugalsan.api.function;
     
     requires com.tugalsan.api.tuple;
     requires com.tugalsan.api.union;

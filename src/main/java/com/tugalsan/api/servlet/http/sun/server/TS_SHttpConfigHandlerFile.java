@@ -1,4 +1,4 @@
-package com.tugalsan.api.servlet.http.server;
+package com.tugalsan.api.servlet.http.sun.server;
 
 import com.tugalsan.api.function.client.TGS_FuncEffectivelyFinal;
 import com.tugalsan.api.function.client.TGS_Func_OutBool_In1;

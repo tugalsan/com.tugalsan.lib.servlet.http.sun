@@ -1,4 +1,4 @@
-package com.tugalsan.api.servlet.http.server;
+package com.tugalsan.api.servlet.http.sun.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;

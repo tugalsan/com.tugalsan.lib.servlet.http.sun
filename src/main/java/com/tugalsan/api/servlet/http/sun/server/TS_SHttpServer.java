@@ -12,7 +12,7 @@ import com.tugalsan.api.charset.client.TGS_CharSet;
 import com.tugalsan.api.file.server.TS_DirectoryUtils;
 import com.tugalsan.api.file.server.TS_FileUtils;
 import com.tugalsan.api.log.server.TS_Log;
-import com.tugalsan.api.unsafe.client.TGS_UnSafe;
+import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
 import com.tugalsan.api.url.client.TGS_Url;
 import com.tugalsan.api.url.client.TGS_UrlUtils;
 import com.tugalsan.api.url.client.parser.TGS_UrlParser;
@@ -30,7 +30,7 @@ public class TS_SHttpServer {
     //    keytool -v -importkeystore -srckeystore keystore.pkcs12 -srcstoretype PKCS12 -destkeystore keystore.jks -deststoretype pkcs12
     // initialise the keystore
     private static SSLContext createSSLContext(TS_SHttpConfigSSL ssl) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             //load keystore
             var ks = KeyStore.getInstance("PKCS12");
             try (var fis = new FileInputStream(ssl.p12.toAbsolutePath().toString())) {
@@ -54,7 +54,7 @@ public class TS_SHttpServer {
     }
 
     private static HttpServer createHttpServer(TS_SHttpConfigNetwork network) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             return network.ip == null
                     ? HttpServer.create(new InetSocketAddress(network.port), 0)
                     : HttpServer.create(new InetSocketAddress(network.ip, network.port), 0);
@@ -65,14 +65,14 @@ public class TS_SHttpServer {
     }
 
     private static HttpsServer createHttpsServer(TS_SHttpConfigNetwork network, SSLContext sslContext) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var server = network.ip == null
                     ? HttpsServer.create(new InetSocketAddress(network.port), 0)//InetAddress.getLoopbackAddress() , 2
                     : HttpsServer.create(new InetSocketAddress(network.ip, network.port), 0);//, 2
             server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 @Override
                 public void configure(HttpsParameters params) {
-                    TGS_UnSafe.run(() -> {
+                    TGS_FuncMTCEUtils.run(() -> {
                         var newEngine = getSSLContext().createSSLEngine();
                         params.setNeedClientAuth(false);
                         params.setCipherSuites(newEngine.getEnabledCipherSuites());
@@ -162,7 +162,7 @@ public class TS_SHttpServer {
                 var redirectUrl = parser.toString();
                 d.ci("addHandlerRedirect", "redirectUrl", redirectUrl);
                 httpExchange.getResponseHeaders().set("Location", redirectUrl);
-                TGS_UnSafe.run(() -> {
+                TGS_FuncMTCEUtils.run(() -> {
                     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, -1);//responseLength = hasBody  ? 0 : -1
                 }, e -> d.ct("addHandlerRedirect", e));
             }
@@ -170,7 +170,7 @@ public class TS_SHttpServer {
     }
 
     public static boolean of(TS_SHttpConfigNetwork network, TS_SHttpConfigSSL ssl, TS_SHttpConfigHandlerFile fileHandlerConfig, TS_SHttpHandlerAbstract... customHandlers) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             var sslContext = createSSLContext(ssl); //create ssl server
             if (sslContext == null) {
                 d.ce("of", "ERROR: createSSLContext returned null");

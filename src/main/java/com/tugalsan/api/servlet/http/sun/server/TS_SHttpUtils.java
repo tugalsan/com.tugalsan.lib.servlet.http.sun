@@ -2,12 +2,12 @@ package com.tugalsan.api.servlet.http.sun.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpsServer;
-import com.tugalsan.api.function.client.TGS_FuncEffectivelyFinal;
+import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCEEffectivelyFinal;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.network.client.TGS_NetworkIPUtils;
 import com.tugalsan.api.union.client.TGS_UnionExcuse;
 import com.tugalsan.api.union.client.TGS_UnionExcuseVoid;
-import com.tugalsan.api.unsafe.client.TGS_UnSafe;
+import com.tugalsan.api.function.client.maythrow.checkedexceptions.TGS_FuncMTCEUtils;
 import java.net.URI;
 import java.util.Objects;
 
@@ -39,12 +39,12 @@ public class TS_SHttpUtils {
     }
 
     public static TGS_UnionExcuse<URI> getURI(HttpExchange httpExchange) {
-        var host = TGS_FuncEffectivelyFinal.ofStr()
+        var host = TGS_FuncMTUCEEffectivelyFinal.ofStr()
                 .anoint(val -> httpExchange.getRequestHeaders().getFirst("Host"))
                 .anointIf(val -> val == null, val -> "localhost:" + httpExchange.getHttpContext().getServer().getAddress().getPort())
                 .coronate();
         var protocol = (httpExchange.getHttpContext().getServer() instanceof HttpsServer) ? "https" : "http";
-        TGS_UnionExcuse<URI> base = TGS_UnSafe.call(() -> TGS_UnionExcuse.of(new URI(protocol, host, "/", null, null)), e -> TGS_UnionExcuse.ofExcuse(e));
+        TGS_UnionExcuse<URI> base = TGS_FuncMTCEUtils.call(() -> TGS_UnionExcuse.of(new URI(protocol, host, "/", null, null)), e -> TGS_UnionExcuse.ofExcuse(e));
         if (base.isExcuse()) {
             return base.toExcuse();
         }
@@ -53,7 +53,7 @@ public class TS_SHttpUtils {
     }
 
     public static TGS_UnionExcuseVoid sendError404(HttpExchange httpExchange, CharSequence funcName, CharSequence consoleErrorMessage) {
-        return TGS_UnSafe.call(() -> {
+        return TGS_FuncMTCEUtils.call(() -> {
             try (httpExchange) {
                 d.ce("sendError404", funcName, consoleErrorMessage);
                 httpExchange.setAttribute("request-path", "ERROR Could not resolve request URI path " + httpExchange.getRequestURI());

@@ -1,7 +1,7 @@
 package com.tugalsan.api.servlet.http.sun.server;
 
-import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCEEffectivelyFinal;
-import com.tugalsan.api.function.client.maythrow.uncheckedexceptions.TGS_FuncMTUCE_OutBool_In1;
+import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTUEffectivelyFinal;
+import com.tugalsan.api.function.client.maythrowexceptions.unchecked.TGS_FuncMTU_OutBool_In1;
 import com.tugalsan.api.log.server.TS_Log;
 import com.tugalsan.api.string.client.TGS_StringUtils;
 import java.nio.file.Path;
@@ -10,8 +10,8 @@ public class TS_SHttpConfigHandlerFile {
 
     final private static TS_Log d = TS_Log.of(false, TS_SHttpConfigHandlerFile.class);
 
-    private TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_FuncMTUCE_OutBool_In1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
-        this.slash_path_slash = TGS_FuncMTUCEEffectivelyFinal.ofStr()
+    private TS_SHttpConfigHandlerFile(String slash_path_slash, TGS_FuncMTU_OutBool_In1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
+        this.slash_path_slash = TGS_FuncMTUEffectivelyFinal.ofStr()
                 .anoint(val -> slash_path_slash)
                 .anointIf(TGS_StringUtils.cmn()::isNullOrEmpty, val -> {
                     d.ci("constructor", "TGS_StringUtils::isNullOrEmpty", "set as '/'");
@@ -32,11 +32,11 @@ public class TS_SHttpConfigHandlerFile {
         this.filterUrlsWithHiddenChars = filterUrlsWithHiddenChars;
     }
     final public String slash_path_slash;
-    final public TGS_FuncMTUCE_OutBool_In1<TS_SHttpHandlerRequest> allow;
+    final public TGS_FuncMTU_OutBool_In1<TS_SHttpHandlerRequest> allow;
     final public Path root;
     final public boolean filterUrlsWithHiddenChars;
 
-    public static TS_SHttpConfigHandlerFile of(String slash_path_slash, TGS_FuncMTUCE_OutBool_In1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
+    public static TS_SHttpConfigHandlerFile of(String slash_path_slash, TGS_FuncMTU_OutBool_In1<TS_SHttpHandlerRequest> allow, Path root, boolean filterUrlsWithHiddenChars) {
         return new TS_SHttpConfigHandlerFile(slash_path_slash, allow, root, filterUrlsWithHiddenChars);
     }
 
